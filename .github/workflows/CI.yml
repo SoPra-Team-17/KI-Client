@@ -14,7 +14,7 @@ jobs:
         - name: Install Dependencies
           run: |
             :
-        - name: Set up Build/Install
+        - name: Set up Build
           run: |
             mkdir build
             cd build
@@ -25,7 +25,9 @@ jobs:
             make
         - name: Tests
           run: |
-            :
+            cd build
+            ./test/KIClient_test
+            
             
     cpplint:
         runs-on: ubuntu-latest
