@@ -20,7 +20,35 @@ jobs:
             git submodule update --init --recursive
         - name: Install Dependencies
           run: |
-            :
+            xargs -ra dependencies.txt sudo apt-get install
+        - name: Set up Build
+          run: |
+            mkdir build
+            cd build
+            cmake ..
+        - name: Build
+          run: |
+            cd build
+            make
+            
+    googletest:
+        runs-on: ubuntu-latest
+        strategy:
+            max-parallel: 4
+            fail-fast: false
+            
+        steps:
+        - uses: actions/checkout@v1
+        - name: Checkout Submodules
+          run: |
+            git config --file .gitmodules --get-regexp url | while read url; do
+              git config --file=.gitmodules $(echo "$url" | sed -E "s/git@github.com:|https:\/\/github.com\//https:\/\/${{ secrets.CI_PAT }}:${{ secrets.CI_PAT }}@github.com\//")
+            done
+            git submodule sync
+            git submodule update --init --recursive
+        - name: Install Dependencies
+          run: |
+            xargs -ra dependencies.txt sudo apt-get install
         - name: Set up Build
           run: |
             mkdir build
