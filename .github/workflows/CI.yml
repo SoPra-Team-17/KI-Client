@@ -20,7 +20,7 @@ jobs:
             git submodule update --init --recursive
         - name: Install Dependencies
           run: |
-            xargs -ra dependencies.txt sudo apt-get install
+            ./installDependencies.sh
         - name: Set up Build
           run: |
             mkdir build
@@ -48,7 +48,7 @@ jobs:
             git submodule update --init --recursive
         - name: Install Dependencies
           run: |
-            xargs -ra dependencies.txt sudo apt-get install
+            ./installDependencies.sh
         - name: Set up Build
           run: |
             mkdir build
