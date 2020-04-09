@@ -3,5 +3,5 @@ cmake_minimum_required(VERSION 3.10)
 include_directories(../src)
 
 add_executable(allTests test1.cpp)
-target_link_libraries(allTests gtest gmock gtest_main KIClient)
+target_link_libraries(allTests gtest gmock gtest_main)
 gtest_discover_tests(allTests)
