@@ -5,7 +5,8 @@
 set -e
 
 # Dependencies from LibClient
-./extern/LibClient/installDependencies.sh
+cd extern/LibClient
+./installDependencies.sh
 
 # CLI11
 cd /tmp
