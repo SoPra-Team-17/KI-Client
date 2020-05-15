@@ -19,4 +19,4 @@ RUN mkdir build
 RUN cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && make -j$(nproc)
 
-ENTRYPOINT /ki/build/src/ki017 --port 7007 --name team017
+ENTRYPOINT /ki/build/src/ki017 --address 127.0.0.1 --port 7007 --name team017
