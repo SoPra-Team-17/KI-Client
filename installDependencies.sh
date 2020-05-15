@@ -4,6 +4,11 @@
 # Exit the script if any command fails
 set -e
 
+# Dependencies from LibCommon
+./extern/LibCommon/installDependencies.sh
+
+# Dependencies from LibClient
+./extern/LibClient/installDependencies.sh
 
 # CLI11
 cd /tmp
