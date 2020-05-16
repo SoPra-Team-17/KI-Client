@@ -8,61 +8,76 @@
 AICallback::AICallback(AI &ai) : ai(ai) {}
 
 void AICallback::onHelloReply() {
-    // TODO implement
+    spdlog::info("received HelloReply message");
+    // do nothing
 }
 
 void AICallback::onGameStarted() {
-    // TODO implement
+    spdlog::info("received GameStarted message");
+    // do nothing
 }
 
 void AICallback::onRequestItemChoice() {
-    // TODO implement
+    spdlog::info("received RequestItemChoice message");
+    ai.itemChoice();
 }
 
 void AICallback::onRequestEquipmentChoice() {
-    // TODO implement
+    spdlog::info("received RequestEquipmentChoice message");
+    ai.equipmentChoice();
 }
 
 void AICallback::onGameStatus() {
-    // TODO implement
+    spdlog::info("received GameStatus message");
+    ai.gameStatus();
 }
 
 void AICallback::onRequestGameOperation() {
-    // TODO implement
+    spdlog::info("received RequestGameOperation message");
+    ai.gameOperation();
 }
 
 void AICallback::onStatistics() {
-    // TODO implement
+    spdlog::info("received Statistics message");
+    ai.statistics();
 }
 
 void AICallback::onGameLeft() {
-    // TODO implement
+    spdlog::info("received GameLeft message");
+    // do nothing (next message is Statistics message)
 }
 
 void AICallback::onGamePause() {
-    // TODO implement
+    spdlog::info("received GamePause message");
+    // do nothing
 }
 
 void AICallback::onMetaInformation() {
-    // TODO implement
+    spdlog::info("received MetaInformation message");
+    ai.metaInformation();
 }
 
 void AICallback::onStrike() {
-    // TODO implement
+    spdlog::info("received Strike message");
+    ai.strike();
 }
 
 void AICallback::onError() {
-    // TODO implement
+    spdlog::info("received Error message");
+    ai.error();
 }
 
 void AICallback::onReplay() {
-    // TODO implement
+    spdlog::info("received Replay message");
+    ai.replay();
 }
 
 void AICallback::connectionLost() {
-    // TODO implement
+    spdlog::info("received connection lost callback");
+    ai.connectionLost();
 }
 
 void AICallback::wrongDestination() {
-    // TODO implement
+    spdlog::debug("received message that was not meant for me");
+    // do nothing
 }

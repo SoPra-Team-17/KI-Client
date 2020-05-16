@@ -29,3 +29,45 @@ AI::AI(const std::string &address, uint16_t port, const std::string &name, unsig
     throw std::domain_error("could not connect to server");
 }
 
+void AI::itemChoice() {
+    // TODO generate and send ItemChoice (with difficulty)
+}
+
+void AI::equipmentChoice() {
+    // TODO generate and send EquipmentChoice (with difficulty)
+}
+
+void AI::gameStatus() {
+    // TODO save additional info or can this be done in LibClient to help Client too ?
+}
+
+void AI::gameOperation() {
+    // TODO generate and  send GameOperation (with difficulty)
+}
+
+void AI::statistics() {
+    // TODO use additional info ?
+}
+
+void AI::metaInformation() {
+    // TODO what to do with received information ?
+    // TODO MatchConfig is needed !!!
+}
+
+void AI::strike() {
+    // TODO how to handle strike ?
+}
+
+void AI::error() {
+    // TODO how to handle different errors ?
+}
+
+void AI::replay() {
+    // TODO use additional info ?
+}
+
+void AI::connectionLost() {
+    // TODO try to reconnect
+}
+
+

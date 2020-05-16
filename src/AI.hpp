@@ -13,6 +13,26 @@ class AI {
         AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
            unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
 
+        void itemChoice();
+
+        void equipmentChoice();
+
+        void gameStatus();
+
+        void gameOperation();
+
+        void statistics();
+
+        void metaInformation();
+
+        void strike();
+
+        void error();
+
+        void replay();
+
+        void connectionLost();
+
     private:
         std::string address;
         uint16_t port;
