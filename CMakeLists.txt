@@ -21,7 +21,6 @@ endif ()
 
 find_package(spdlog REQUIRED)
 find_package(CLI11 REQUIRED)
-add_definitions(-DCLI11_HAS_FILESYSTEM=1)
 
 add_subdirectory(src)
 add_subdirectory(extern/LibClient)
