@@ -13,6 +13,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${COMMON_CXX_FLAGS} -Wall -Wextra
 target_link_libraries(${PROJECT_NAME}
 		spdlog::spdlog
 		CLI11::CLI11 stdc++fs
+		SopraNetwork
 		SopraCommon
 		SopraClient
 		$<$<CONFIG:Debug>:--coverage>)
