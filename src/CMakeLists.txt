@@ -3,6 +3,9 @@ project(ki017)
 
 set(SOURCE
         main.cpp
+		AI.cpp
+		AICallback.cpp
+		util/Logging.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

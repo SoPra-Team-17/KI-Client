@@ -6,6 +6,8 @@
 
 #include <CLI/CLI.hpp>
 #include <spdlog/spdlog.h>
+#include <thread>
+#include "AI.hpp"
 
 constexpr unsigned int maxVerbosity = spdlog::level::level_enum::n_levels;
 constexpr unsigned int maxDifficulty = 1;
@@ -32,8 +34,8 @@ int main(int argc, char *argv[]) {
     app.add_option("--x", keyValueStrings, "Additional key value pairs");
     app.add_option("--port,-p", port, "Port of server to connect to")->check(CLI::PositiveNumber);
     app.add_option("--verbosity,-v", verbosity, "Logging verbosity")->check(CLI::Range(maxVerbosity));
-    app.add_option("--name,-n", name, "Name of KI to be shown in game");
-    app.add_option("--difficulty,-d", difficulty, "Difficulty of KI")->check(CLI::Range(maxDifficulty));
+    app.add_option("--name,-n", name, "Name of AI to be shown in game");
+    app.add_option("--difficulty,-d", difficulty, "Difficulty of AI")->check(CLI::Range(maxDifficulty));
 
     try {
         app.parse(argc, argv);
@@ -49,6 +51,13 @@ int main(int argc, char *argv[]) {
     for (unsigned int i = 0; i + 1 < keyValueStrings.size(); i += 2) {
         additionalOptions[keyValueStrings.at(i)] = keyValueStrings.at(i + 1);
     }
+
+    // start ki
+    AI ki(address, port, name, verbosity, difficulty, additionalOptions);
+
+    // "stay alive"
+    std::this_thread::sleep_until(
+            std::chrono::system_clock::now() + std::chrono::hours(std::numeric_limits<int>::max()));
 
     return 0;
 }
