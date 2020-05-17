@@ -4,15 +4,16 @@
 
 #include "AI.hpp"
 
-#include <generate/ItemChoice.hpp>
-#include <generate/EquipmentChoice.hpp>
-#include <generate/GameOperation.hpp>
+#include <generate/ItemChoice_gen.hpp>
+#include <generate/EquipmentChoice_gen.hpp>
+#include <generate/GameOperation_gen.hpp>
+#include <utility>
 #include "util/Logging.hpp"
 #include "AICallback.hpp"
 
-AI::AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
+AI::AI(std::string address, uint16_t port, const std::string &name, unsigned int verbosity,
        unsigned int difficulty,
-       std::map<std::string, std::string> additionalOptions) : address(address), port(port), name(name),
+       std::map<std::string, std::string> additionalOptions) : address(std::move(address)), port(port), name(name),
                                                                difficulty(difficulty) {
 
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
@@ -38,28 +39,51 @@ void AI::connect() {
         exit(2);
     }
     spdlog::info("send Hello message");
+}
 
-    // TODO make sure that matchConfig is available
+void AI::requestConfigs() {
+    using namespace spy::network::messages;
+    if (!libClientHandler->network.sendRequestMetaInformation(
+            {MetaInformationKey::CONFIGURATION_MATCH_CONFIG, MetaInformationKey::CONFIGURATION_SCENARIO,
+             MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION})) {
+        spdlog::critical("could not send RequestMetaInformation message for configs");
+        exit(2);
+    }
+    spdlog::info("send RequestMetaInformation message for configs");
+}
+
+void AI::welcomed() {
+    requestConfigs();
 }
 
 void AI::itemChoice() {
-    auto choice = ItemChoice::generate(difficulty, libClientHandler->getOfferedCharacters(),
-                                       libClientHandler->getOfferedGadgets(), matchConfig);
+    if (!matchConfig.has_value() || !scenarioConfig.has_value() || !characterConfig.has_value()) {
+        spdlog::error("configs for item choice are not available");
+        configsWereNotAvailable = true;
+        requestConfigs();
+        return;
+    }
+    auto choice = ItemChoice_gen::generate(difficulty, libClientHandler->getOfferedCharacters(),
+                                           libClientHandler->getOfferedGadgets(), matchConfig.value(),
+                                           scenarioConfig.value(),
+                                           characterConfig.value());
     if (!libClientHandler->network.sendItemChoice(choice)) {
-        spdlog::critical("could not send ItemChoice message");
+        spdlog::critical("could not send ItemChoice_gen message");
         exit(2);
     }
-    spdlog::info("sent ItemChoice message");
+    spdlog::info("sent ItemChoice_gen message");
 }
 
 void AI::equipmentChoice() {
-    auto equipment = EquipmentChoice::generate(difficulty, libClientHandler->getChosenCharacters(),
-                                               libClientHandler->getChosenGadgets(), matchConfig);
+    auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler->getChosenCharacters(),
+                                                   libClientHandler->getChosenGadgets(), matchConfig.value(),
+                                                   scenarioConfig.value(),
+                                                   characterConfig.value());
     if (!libClientHandler->network.sendEquipmentChoice(equipment)) {
-        spdlog::critical("could not send EquipmentChoice message");
+        spdlog::critical("could not send EquipmentChoice_gen message");
         exit(2);
     }
-    spdlog::info("sent EquipmentChoice message");
+    spdlog::info("sent EquipmentChoice_gen message");
 }
 
 void AI::gameStatus() {
@@ -67,22 +91,30 @@ void AI::gameStatus() {
 }
 
 void AI::gameOperation() {
-    auto operation = GameOperation::generate(difficulty, libClientHandler->getActiveCharacter(),
-                                             libClientHandler->getState(), matchConfig);
-    if (!libClientHandler->network.sendGameOperation(operation, matchConfig)) {
-        spdlog::critical("could not send GameOperation message");
+    auto operation = GameOperation_gen::generate(difficulty, libClientHandler->getActiveCharacter(),
+                                                 libClientHandler->getState(), matchConfig.value());
+    if (!libClientHandler->network.sendGameOperation(operation, matchConfig.value())) {
+        spdlog::critical("could not send GameOperation_gen message");
         exit(2);
     }
-    spdlog::info("sent GameOperation message");
+    spdlog::info("sent GameOperation_gen message");
 }
 
 void AI::statistics() {
-    // TODO use as additional info ?
+    // could be used as additional information for next runs
 }
 
 void AI::metaInformation() {
-    // TODO what to do with received information ?
-    // TODO MatchConfig is needed !!!
+    using namespace spy::network::messages;
+    auto infoMap = libClientHandler->getInformation();
+    matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+    scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
+    characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+
+    if (configsWereNotAvailable) {
+        configsWereNotAvailable = false;
+        itemChoice();
+    }
 }
 
 void AI::strike() {
@@ -121,7 +153,7 @@ void AI::error() {
 }
 
 void AI::replay() {
-    // TODO use as additional info ?
+    // could be used as additional information for next runs
 }
 
 void AI::connectionLost() {

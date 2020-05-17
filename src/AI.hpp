@@ -10,8 +10,10 @@
 
 class AI {
     public:
-        AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
+        AI(std::string address, uint16_t port, const std::string &name, unsigned int verbosity,
            unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
+
+        void welcomed();
 
         void itemChoice();
 
@@ -41,9 +43,13 @@ class AI {
         unsigned int maxReconnect;
 
         std::optional<libclient::LibClient> libClientHandler;
-        spy::MatchConfig matchConfig;
+        std::optional<spy::MatchConfig> matchConfig;
+        std::optional<spy::scenario::Scenario> scenarioConfig;
+        std::optional<std::vector<spy::character::CharacterInformation>> characterConfig;
+        bool configsWereNotAvailable = false;
 
         void connect();
+        void requestConfigs();
 };
 
 

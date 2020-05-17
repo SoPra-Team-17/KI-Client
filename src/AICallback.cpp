@@ -9,7 +9,7 @@ AICallback::AICallback(AI &ai) : ai(ai) {}
 
 void AICallback::onHelloReply() {
     spdlog::info("received HelloReply message");
-    // do nothing
+    ai.welcomed();
 }
 
 void AICallback::onGameStarted() {
