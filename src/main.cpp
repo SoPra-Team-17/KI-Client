@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     std::string name = defaultName;
     unsigned int difficulty = defaultDifficulty;
 
-    app.add_option("--address,-a", name, "IP address of server to connect to")->required()->check(CLI::ValidIPV4);
+    app.add_option("--address,-a", address, "IP address of server to connect to")->required()->check(CLI::ValidIPV4);
     app.add_option("--x", keyValueStrings, "Additional key value pairs");
     app.add_option("--port,-p", port, "Port of server to connect to")->check(CLI::PositiveNumber);
     app.add_option("--verbosity,-v", verbosity, "Logging verbosity")->check(CLI::Range(maxVerbosity));
