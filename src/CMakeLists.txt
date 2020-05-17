@@ -6,6 +6,12 @@ set(SOURCE
 		AI.cpp
 		AICallback.cpp
 		util/Logging.cpp
+		generate/ItemChoice.cpp
+		generate/EquipmentChoice.cpp
+		generate/GameOperation.cpp
+		generate/random/ItemChoice.cpp
+		generate/random/EquipmentChoice.cpp
+		generate/random/GameOperation.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

@@ -37,11 +37,13 @@ class AI {
         std::string address;
         uint16_t port;
         std::string name;
-        unsigned int verbosity;
         unsigned int difficulty;
-        std::map<std::string, std::string> additionalOptions;
+        unsigned int maxReconnect;
 
         std::optional<libclient::LibClient> libClientHandler;
+        spy::MatchConfig matchConfig;
+
+        void connect();
 };
 
 
