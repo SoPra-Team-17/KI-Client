@@ -5,7 +5,8 @@
 #include "../GameOperation.hpp"
 
 std::shared_ptr<spy::gameplay::BaseOperation>
-GameOperation::random(const spy::util::UUID &characterId, const spy::gameplay::State &s,
-                      const spy::MatchConfig &config) {
+GameOperation::random(const spy::util::UUID &/*characterId*/, const spy::gameplay::State &/*s*/,
+                      const spy::MatchConfig &/*config*/) {
     // TODO implement
+    return nullptr;
 }
