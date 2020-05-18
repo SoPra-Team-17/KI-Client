@@ -13,12 +13,10 @@
 AI::AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
        unsigned int difficulty,
        std::map<std::string, std::string> additionalOptions) : address(address), port(port), name(name),
-                                                               difficulty(difficulty) {
+                                                               difficulty(difficulty), libClientHandler{std::dynamic_pointer_cast<libclient::Callback>(std::make_shared<AICallback>(*this))} {
 
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
-
-    libClientHandler.emplace(std::dynamic_pointer_cast<libclient::Callback>(std::make_shared<AICallback>(*this)));
 
     // set up logging
     Logging::initLogging(verbosity);
@@ -28,12 +26,12 @@ AI::AI(const std::string &address, uint16_t port, const std::string &name, unsig
 
 void AI::connect() {
     // connect to server as AI
-    if (!libClientHandler->network.connect(address, port)) {
+    if (!libClientHandler.network.connect(address, port)) {
         spdlog::critical("could not connect to server");
         exit(2);
     }
     spdlog::info("connected to server");
-    if (!libClientHandler->network.sendHello(name, spy::network::RoleEnum::AI)) {
+    if (!libClientHandler.network.sendHello(name, spy::network::RoleEnum::AI)) {
         spdlog::critical("could not send Hello message");
         exit(2);
     }
@@ -43,9 +41,9 @@ void AI::connect() {
 }
 
 void AI::itemChoice() {
-    auto choice = ItemChoice::generate(difficulty, libClientHandler->getOfferedCharacters(),
-                                       libClientHandler->getOfferedGadgets(), matchConfig);
-    if (!libClientHandler->network.sendItemChoice(choice)) {
+    auto choice = ItemChoice::generate(difficulty, libClientHandler.getOfferedCharacters(),
+                                       libClientHandler.getOfferedGadgets(), matchConfig);
+    if (!libClientHandler.network.sendItemChoice(choice)) {
         spdlog::critical("could not send ItemChoice message");
         exit(2);
     }
@@ -53,9 +51,9 @@ void AI::itemChoice() {
 }
 
 void AI::equipmentChoice() {
-    auto equipment = EquipmentChoice::generate(difficulty, libClientHandler->getChosenCharacters(),
-                                               libClientHandler->getChosenGadgets(), matchConfig);
-    if (!libClientHandler->network.sendEquipmentChoice(equipment)) {
+    auto equipment = EquipmentChoice::generate(difficulty, libClientHandler.getChosenCharacters(),
+                                               libClientHandler.getChosenGadgets(), matchConfig);
+    if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
         spdlog::critical("could not send EquipmentChoice message");
         exit(2);
     }
@@ -67,9 +65,9 @@ void AI::gameStatus() {
 }
 
 void AI::gameOperation() {
-    auto operation = GameOperation::generate(difficulty, libClientHandler->getActiveCharacter(),
-                                             libClientHandler->getState(), matchConfig);
-    if (!libClientHandler->network.sendGameOperation(operation, matchConfig)) {
+    auto operation = GameOperation::generate(difficulty, libClientHandler.getActiveCharacter(),
+                                             libClientHandler.getState(), matchConfig);
+    if (!libClientHandler.network.sendGameOperation(operation, matchConfig)) {
         spdlog::critical("could not send GameOperation message");
         exit(2);
     }
@@ -90,7 +88,7 @@ void AI::strike() {
 }
 
 void AI::error() {
-    switch (libClientHandler->getErrorReason().value()) {
+    switch (libClientHandler.getErrorReason().value()) {
         case spy::network::ErrorTypeEnum::NAME_NOT_AVAILABLE:
             spdlog::error("error type is name not available");
             if (name == "ki017") {
@@ -126,7 +124,7 @@ void AI::replay() {
 
 void AI::connectionLost() {
     for (unsigned int i = 0; i < maxReconnect; i++) {
-        if (libClientHandler->network.sendReconnect()) {
+        if (libClientHandler.network.sendReconnect()) {
             spdlog::info("sent Reconnect message");
             return;
         }

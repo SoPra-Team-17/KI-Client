@@ -40,7 +40,7 @@ class AI {
         unsigned int difficulty;
         unsigned int maxReconnect;
 
-        std::optional<libclient::LibClient> libClientHandler;
+        libclient::LibClient libClientHandler;
         spy::MatchConfig matchConfig;
 
         void connect();
