@@ -19,6 +19,8 @@ jobs:
         with:
           # fetch-depth = 0 is equivalent to entire commit-history
           fetch-depth: 0
+          submodules: recursive
+      - run: git fetch origin develop:refs/remotes/origin/develop
       - name: Restore cache for sonar analysis
         uses: actions/cache@v1
         env:
@@ -50,7 +52,7 @@ jobs:
         # gcov is used to generate coverage information for sonar-scanner
         run: |
           cd build
-          ./test/allTests
+          ./test/KITests
           gcov-8 $(find . -type f -name "*.gc*")
       - name: sonar-scanner
         run: |

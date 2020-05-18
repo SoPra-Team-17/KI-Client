@@ -9,13 +9,14 @@ jobs:
       fail-fast: false
       matrix:
         cxx: [g++-8, clang++]
+        build: [Release, Debug]
     env:
       CXX: ${{ matrix.cxx }}
 
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: true
+          submodules: recursive
       - name: Install Dependencies
         run: |
           ./installDependencies.sh
@@ -23,12 +24,8 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake ..
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build }} ..
       - name: Build
         run: |
           cd build
-          make
-      - name: Install
-        run: |
-          cd build
-          sudo make install
+          make -j$(nproc)
