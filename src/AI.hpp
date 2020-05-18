@@ -29,8 +29,6 @@ class AI {
 
         void error();
 
-        void replay();
-
         void connectionLost();
 
     private:

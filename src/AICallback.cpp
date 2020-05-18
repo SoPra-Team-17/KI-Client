@@ -69,7 +69,6 @@ void AICallback::onError() {
 
 void AICallback::onReplay() {
     spdlog::info("received Replay message");
-    ai.replay();
 }
 
 void AICallback::connectionLost() {

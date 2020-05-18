@@ -76,6 +76,11 @@ void AI::gameOperation() {
 
 void AI::statistics() {
     // TODO use as additional info ?
+    std::string endString = "Game ";
+    endString += libClientHandler.getWinner().value() == libClientHandler.getId().value() ? "won!" : "lost!";
+    spdlog::info(endString);
+    libClientHandler.network.disconnect();
+    exit(0);
 }
 
 void AI::metaInformation() {
@@ -116,10 +121,6 @@ void AI::error() {
             spdlog::critical("error type is general or unknown");
             exit(1);
     }
-}
-
-void AI::replay() {
-    // TODO use as additional info ?
 }
 
 void AI::connectionLost() {
