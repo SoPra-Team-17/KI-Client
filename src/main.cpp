@@ -15,6 +15,18 @@ constexpr unsigned int defaultVerbosity = 5;
 constexpr auto defaultName = "ki017";
 constexpr unsigned int defaultDifficulty = maxDifficulty;
 
+class StringLengthTwo : public CLI::Validator {
+    public:
+        StringLengthTwo() : Validator() {
+            func_ = [](std::string &str) {
+                if(str.length() < 2) {
+                    return std::string("String has to contain min. two characters: ") + str + ')';
+                }
+                return std::string();
+            };
+        }
+};
+
 int main(int argc, char *argv[]) {
     CLI::App app;
 
@@ -32,7 +44,7 @@ int main(int argc, char *argv[]) {
     app.add_option("--x", keyValueStrings, "Additional key value pairs");
     app.add_option("--port,-p", port, "Port of server to connect to")->check(CLI::PositiveNumber);
     app.add_option("--verbosity,-v", verbosity, "Logging verbosity")->check(CLI::Range(maxVerbosity));
-    app.add_option("--name,-n", name, "Name of KI to be shown in game");
+    app.add_option("--name,-n", name, "Name of KI to be shown in game")->check(StringLengthTwo());
     app.add_option("--difficulty,-d", difficulty, "Difficulty of KI")->check(CLI::Range(maxDifficulty));
 
     try {
