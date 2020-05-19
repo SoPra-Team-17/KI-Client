@@ -24,7 +24,7 @@ namespace CLI::validate {
     class IPAddress : public Validator {
         public:
             IPAddress() : Validator("IPV4 or IPV6") {
-                func_ = [](std::string &str) {
+                func_ = [](const std::string &str) {
                     if (str.find('.') != std::string::npos) {
                         // ipv4
                         struct sockaddr_in sa{};
