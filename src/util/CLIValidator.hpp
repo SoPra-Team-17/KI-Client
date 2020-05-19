@@ -12,7 +12,7 @@ namespace CLI::validate {
     class StringLengthTwo : public Validator {
         public:
             StringLengthTwo() : Validator("StrLengthTwo") {
-                func_ = [](std::string &str) {
+                func_ = [](const std::string &str) {
                     if (str.length() < 2) {
                         return std::string("String has to contain min. two characters: ") + str + ')';
                     }
