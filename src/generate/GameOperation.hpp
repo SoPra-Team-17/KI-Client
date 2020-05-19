@@ -13,10 +13,12 @@ class GameOperation {
     public:
         GameOperation() = delete;
 
-        static std::shared_ptr<spy::gameplay::BaseOperation> generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config);
+        static auto generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
+                             const spy::MatchConfig &config) -> std::shared_ptr<spy::gameplay::BaseOperation>;
 
     private:
-        static std::shared_ptr<spy::gameplay::BaseOperation> random(const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config);
+        static auto random(const spy::util::UUID &characterId, const spy::gameplay::State &s,
+                           const spy::MatchConfig &config) -> std::shared_ptr<spy::gameplay::BaseOperation>;
 };
 
 #endif //KICLIENT_GAMEOPERATION_HPP

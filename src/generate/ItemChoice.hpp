@@ -15,11 +15,13 @@ class ItemChoice {
     public:
         ItemChoice() = delete;
 
-        static std::variant<spy::util::UUID, spy::gadget::GadgetEnum> generate(unsigned int difficulty, std::vector<spy::util::UUID> offeredCharacterIds,
-                 std::vector<spy::gadget::GadgetEnum> offeredGadgets, const spy::MatchConfig &config);
+        static auto generate(unsigned int difficulty, std::vector<spy::util::UUID> offeredCharacterIds,
+                             std::vector<spy::gadget::GadgetEnum> offeredGadgets,
+                             const spy::MatchConfig &config) -> std::variant<spy::util::UUID, spy::gadget::GadgetEnum>;
 
     private:
-        static std::variant<spy::util::UUID, spy::gadget::GadgetEnum> random(std::vector<spy::util::UUID> offeredCharacterIds, std::vector<spy::gadget::GadgetEnum> offeredGadgets);
+        static auto random(std::vector<spy::util::UUID> offeredCharacterIds,
+                           std::vector<spy::gadget::GadgetEnum> offeredGadgets) -> std::variant<spy::util::UUID, spy::gadget::GadgetEnum>;
 };
 
 #endif //KICLIENT_ITEMCHOICE_HPP
