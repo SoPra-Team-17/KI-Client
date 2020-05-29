@@ -25,7 +25,7 @@
 
         void onRequestGameOperation() override;
 
-        void onStatistics() override;
+        [[noreturn]] void onStatistics() override;
 
         void onGameLeft() override;
 
