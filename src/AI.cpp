@@ -27,26 +27,26 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
 void AI::connect() {
     // connect to server as AI
     if (!libClientHandler.network.connect(address, port)) {
-        spdlog::critical("could not connect to server");
-        exit(2);
+        throw std::runtime_error{"could not connect to server"};
     }
     spdlog::info("connected to server");
     if (!libClientHandler.network.sendHello(name, spy::network::RoleEnum::AI)) {
-        spdlog::critical("could not send Hello message");
-        exit(2);
+        throw std::runtime_error{"could not send Hello message"};
     }
     spdlog::info("send Hello message");
 }
 
 void AI::requestConfigs() {
-    using namespace spy::network::messages;
-    if (!libClientHandler.network.sendRequestMetaInformation(
-            {MetaInformationKey::CONFIGURATION_MATCH_CONFIG, MetaInformationKey::CONFIGURATION_SCENARIO,
-             MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION})) {
-        spdlog::critical("could not send RequestMetaInformation message for configs");
-        exit(2);
+    if (!configsInProgress) {
+        using namespace spy::network::messages;
+        if (!libClientHandler.network.sendRequestMetaInformation(
+                {MetaInformationKey::CONFIGURATION_MATCH_CONFIG, MetaInformationKey::CONFIGURATION_SCENARIO,
+                 MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION})) {
+            throw std::runtime_error{"could not send RequestMetaInformation message for configs"};
+        }
+        configsInProgress = true;
+        spdlog::info("send RequestMetaInformation message for configs");
     }
-    spdlog::info("send RequestMetaInformation message for configs");
 }
 
 void AI::onHelloReply() {
@@ -74,10 +74,9 @@ void AI::onRequestItemChoice() {
                                            scenarioConfig.value(),
                                            characterConfig.value());
     if (!libClientHandler.network.sendItemChoice(choice)) {
-        spdlog::critical("could not send ItemChoice_gen message");
-        exit(2);
+        throw std::runtime_error{"could not send ItemChoice_gen message"};
     }
-    spdlog::info("sent ItemChoice_gen message");
+    spdlog::info("sent ItemChoice message");
 }
 
 void AI::onRequestEquipmentChoice() {
@@ -88,10 +87,9 @@ void AI::onRequestEquipmentChoice() {
                                                    scenarioConfig.value(),
                                                    characterConfig.value());
     if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
-        spdlog::critical("could not send EquipmentChoice_gen message");
-        exit(2);
+        throw std::runtime_error{"could not send EquipmentChoice_gen message"};
     }
-    spdlog::info("sent EquipmentChoice_gen message");
+    spdlog::info("sent EquipmentChoice message");
 }
 
 void AI::onGameStatus() {
@@ -106,10 +104,9 @@ void AI::onRequestGameOperation() {
     auto operation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
                                                  libClientHandler.getState(), matchConfig.value());
     if (!libClientHandler.network.sendGameOperation(operation, matchConfig.value())) {
-        spdlog::critical("could not send GameOperation_gen message");
-        exit(2);
+        throw std::runtime_error{"could not send GameOperation_gen message"};
     }
-    spdlog::info("sent GameOperation_gen message");
+    spdlog::info("sent GameOperation message");
 }
 
 void AI::onStatistics() {
@@ -137,52 +134,53 @@ void AI::onMetaInformation() {
 
     using namespace spy::network::messages;
     auto infoMap = libClientHandler.getInformation();
-    matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
-    scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
-    characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+    try {
+        matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+        scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
+        characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(
+                infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
 
-    if (configsWereNotAvailable) {
-        configsWereNotAvailable = false;
-        onRequestItemChoice();
+        if (configsWereNotAvailable) {
+            configsWereNotAvailable = false;
+            onRequestItemChoice();
+        }
+    } catch (std::out_of_range &e) {
+        requestConfigs();
     }
 }
 
 void AI::onStrike() {
     spdlog::info("received Strike message");
 
+    configsInProgress = false;
     spdlog::warn("ki caused a strike");
 }
 
 void AI::onError() {
     spdlog::info("received Error message");
 
+    configsInProgress = false;
     switch (libClientHandler.getErrorReason().value()) {
         case spy::network::ErrorTypeEnum::NAME_NOT_AVAILABLE:
             spdlog::error("error type is name not available");
             if (name == "ki017") {
-                spdlog::critical("default name is not available");
-                std::exit(1);
+                throw std::runtime_error{"default name is not available"};
             }
             name = "ki017";
             connect();
             break;
         case spy::network::ErrorTypeEnum::ALREADY_SERVING:
-            spdlog::critical("error type is already serving");
-            std::exit(1);
+            throw std::runtime_error{"error type is already serving"};
         case spy::network::ErrorTypeEnum::SESSION_DOES_NOT_EXIST:
-            spdlog::critical("error type is session does not exist");
-            std::exit(1);
+            throw std::runtime_error{"error type is session does not exist"};
         case spy::network::ErrorTypeEnum::ILLEGAL_MESSAGE:
-            spdlog::critical("error type is illegal message");
-            std::exit(1);
+            throw std::runtime_error{"error type is illegal message"};
         case spy::network::ErrorTypeEnum::TOO_MANY_STRIKES:
-            spdlog::critical("error type is too many strikes");
-            std::exit(1);
+            throw std::runtime_error{"error type is too many strikes"};
         case spy::network::ErrorTypeEnum::GENERAL:
             [[fallthrough]];
         default:
-            spdlog::critical("error type is general or unknown");
-            std::exit(1);
+            throw std::runtime_error{"error type is general or unknown"};
     }
 }
 
@@ -194,14 +192,14 @@ void AI::onReplay() {
 void AI::connectionLost() {
     spdlog::info("received connection lost callback");
 
+    configsInProgress = false;
     for (unsigned int i = 0; i < maxReconnect; i++) {
         if (libClientHandler.network.sendReconnect()) {
             spdlog::info("sent Reconnect message");
             return;
         }
     }
-    spdlog::critical("could not reconnect");
-    std::exit(2);
+    throw std::runtime_error{"could not reconnect"};
 }
 
 void AI::wrongDestination() {

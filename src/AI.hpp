@@ -56,6 +56,7 @@ class AI : public libclient::Callback {
         std::optional<spy::scenario::Scenario> scenarioConfig;
         std::optional<std::vector<spy::character::CharacterInformation>> characterConfig;
         bool configsWereNotAvailable = false;
+        bool configsInProgress = false;
 
         void connect();
         void requestConfigs();
