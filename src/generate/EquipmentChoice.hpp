@@ -15,13 +15,13 @@ class EquipmentChoice {
     public:
         EquipmentChoice() = delete;
 
-        static auto generate(unsigned int difficulty, std::vector<spy::util::UUID> chosenCharacterIds,
-                             std::vector<spy::gadget::GadgetEnum> chosenGadgets,
+        static auto generate(unsigned int difficulty, const std::vector<spy::util::UUID> &chosenCharacterIds,
+                             const std::vector<spy::gadget::GadgetEnum> &chosenGadgets,
                              const spy::MatchConfig &config) -> std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>;
 
     private:
-        static auto random(std::vector<spy::util::UUID> chosenCharacterIds,
-                           std::vector<spy::gadget::GadgetEnum> chosenGadgets) -> std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>;
+        static auto random(const std::vector<spy::util::UUID> &chosenCharacterIds,
+                           const std::vector<spy::gadget::GadgetEnum> &chosenGadgets) -> std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>;
 };
 
 #endif //KICLIENT_EQUIPMENTCHOICE_HPP

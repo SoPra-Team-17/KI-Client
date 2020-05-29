@@ -5,8 +5,8 @@
 #include "ItemChoice.hpp"
 
 std::variant<spy::util::UUID, spy::gadget::GadgetEnum>
-ItemChoice::generate(unsigned int difficulty, std::vector<spy::util::UUID> offeredCharacterIds,
-                     std::vector<spy::gadget::GadgetEnum> offeredGadgets, const spy::MatchConfig &/*config*/) {
+ItemChoice::generate(unsigned int difficulty, const std::vector<spy::util::UUID> &offeredCharacterIds,
+                     const std::vector<spy::gadget::GadgetEnum> &offeredGadgets, const spy::MatchConfig &/*config*/) {
     switch (difficulty) {
         case 1:
             return random(offeredCharacterIds, offeredGadgets);
