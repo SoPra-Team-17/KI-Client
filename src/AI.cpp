@@ -9,17 +9,14 @@
 #include <generate/GameOperation_gen.hpp>
 #include <utility>
 #include "util/Logging.hpp"
-#include "AICallback.hpp"
 
-AI::AI(std::string address, uint16_t port, const std::string &name, unsigned int verbosity,
+AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
        unsigned int difficulty,
-       std::map<std::string, std::string> additionalOptions) : address(std::move(address)), port(port), name(name),
-                                                               difficulty(difficulty) {
-
+       std::map<std::string, std::string> additionalOptions) : address(std::move(address)), port(port),
+                                                               name(std::move(name)),
+                                                               difficulty(difficulty), libClientHandler{this} {
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
-
-    libClientHandler.emplace(std::dynamic_pointer_cast<libclient::Callback>(std::make_shared<AICallback>(*this)));
 
     // set up logging
     Logging::initLogging(verbosity);
@@ -52,11 +49,20 @@ void AI::requestConfigs() {
     spdlog::info("send RequestMetaInformation message for configs");
 }
 
-void AI::welcomed() {
+void AI::onHelloReply() {
+    spdlog::info("received HelloReply message");
+    
     requestConfigs();
 }
 
-void AI::itemChoice() {
+void AI::onGameStarted() {
+    spdlog::info("received GameStarted message");
+    // do nothing
+}
+
+void AI::onRequestItemChoice() {
+    spdlog::info("received RequestItemChoice message");
+  
     if (!matchConfig.has_value() || !scenarioConfig.has_value() || !characterConfig.has_value()) {
         spdlog::error("configs for item choice are not available");
         configsWereNotAvailable = true;
@@ -74,7 +80,9 @@ void AI::itemChoice() {
     spdlog::info("sent ItemChoice_gen message");
 }
 
-void AI::equipmentChoice() {
+void AI::onRequestEquipmentChoice() {
+    spdlog::info("received RequestEquipmentChoice message");
+
     auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler->getChosenCharacters(),
                                                    libClientHandler->getChosenGadgets(), matchConfig.value(),
                                                    scenarioConfig.value(),
@@ -86,11 +94,15 @@ void AI::equipmentChoice() {
     spdlog::info("sent EquipmentChoice_gen message");
 }
 
-void AI::gameStatus() {
-    // TODO save additional info (can this be done in LibClient to help Client too) ?
+void AI::onGameStatus() {
+    spdlog::info("received GameStatus message");
+
+    // additional info could be saved here (can this be done in LibClient to help Client too) ?
 }
 
-void AI::gameOperation() {
+void AI::onRequestGameOperation() {
+    spdlog::info("received RequestGameOperation message");
+
     auto operation = GameOperation_gen::generate(difficulty, libClientHandler->getActiveCharacter(),
                                                  libClientHandler->getState(), matchConfig.value());
     if (!libClientHandler->network.sendGameOperation(operation, matchConfig.value())) {
@@ -100,11 +112,29 @@ void AI::gameOperation() {
     spdlog::info("sent GameOperation_gen message");
 }
 
-void AI::statistics() {
-    // could be used as additional information for next runs
+void AI::onStatistics() {
+    spdlog::info("received Statistics message");
+
+    // additional info (for next runs) could be saved here
+    std::string endString = "Game ";
+    endString += libClientHandler.getWinner().value() == libClientHandler.getId().value() ? "won!" : "lost!";
+    spdlog::info(endString);
+    std::exit(0);
 }
 
-void AI::metaInformation() {
+void AI::onGameLeft() {
+    spdlog::info("received GameLeft message");
+    // do nothing (next message is Statistics message)
+}
+
+void AI::onGamePause() {
+    spdlog::info("received GamePause message");
+    // do nothing
+}
+
+void AI::onMetaInformation() {
+    spdlog::info("received MetaInformation message");
+
     using namespace spy::network::messages;
     auto infoMap = libClientHandler->getInformation();
     matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
@@ -117,54 +147,66 @@ void AI::metaInformation() {
     }
 }
 
-void AI::strike() {
+void AI::onStrike() {
+    spdlog::info("received Strike message");
+
     spdlog::warn("ki caused a strike");
 }
 
-void AI::error() {
-    switch (libClientHandler->getErrorReason().value()) {
+void AI::onError() {
+    spdlog::info("received Error message");
+
+    switch (libClientHandler.getErrorReason().value()) {
         case spy::network::ErrorTypeEnum::NAME_NOT_AVAILABLE:
             spdlog::error("error type is name not available");
             if (name == "ki017") {
                 spdlog::critical("default name is not available");
-                exit(1);
+                std::exit(1);
             }
             name = "ki017";
             connect();
             break;
         case spy::network::ErrorTypeEnum::ALREADY_SERVING:
             spdlog::critical("error type is already serving");
-            exit(1);
+            std::exit(1);
         case spy::network::ErrorTypeEnum::SESSION_DOES_NOT_EXIST:
             spdlog::critical("error type is session does not exist");
-            exit(1);
+            std::exit(1);
         case spy::network::ErrorTypeEnum::ILLEGAL_MESSAGE:
             spdlog::critical("error type is illegal message");
-            exit(1);
+            std::exit(1);
         case spy::network::ErrorTypeEnum::TOO_MANY_STRIKES:
             spdlog::critical("error type is too many strikes");
-            exit(1);
+            std::exit(1);
         case spy::network::ErrorTypeEnum::GENERAL:
             [[fallthrough]];
         default:
             spdlog::critical("error type is general or unknown");
-            exit(1);
+            std::exit(1);
     }
 }
 
-void AI::replay() {
-    // could be used as additional information for next runs
+void AI::onReplay() {
+    spdlog::debug("received Replay message");
+    // do nothing
 }
 
 void AI::connectionLost() {
+    spdlog::info("received connection lost callback");
+
     for (unsigned int i = 0; i < maxReconnect; i++) {
-        if (libClientHandler->network.sendReconnect()) {
+        if (libClientHandler.network.sendReconnect()) {
             spdlog::info("sent Reconnect message");
             return;
         }
     }
     spdlog::critical("could not reconnect");
-    exit(2);
+    std::exit(2);
+}
+
+void AI::wrongDestination() {
+    spdlog::debug("received message that was not meant for me");
+    // do nothing
 }
 
 

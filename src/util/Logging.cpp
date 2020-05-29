@@ -2,6 +2,7 @@
 // Created by Carolin on 16.05.2020.
 //
 
+
 #include "Logging.hpp"
 
 void Logging::initLogging(unsigned int verbosity) {
@@ -16,7 +17,8 @@ void Logging::initLogging(unsigned int verbosity) {
     // logging to console can be influenced via verbosity setting
     auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
     consoleSink->set_color_mode(spdlog::color_mode::always);
-    consoleSink->set_level(static_cast<spdlog::level::level_enum>(verbosity));
+    verbosity = std::abs(static_cast<int>(verbosity - spdlog::level::level_enum::n_levels));
+    consoleSink->set_level(static_cast<spdlog::level::level_enum>((verbosity)));
 
     // logging to file always works with max logging level
     auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/" + logFile);
