@@ -8,32 +8,40 @@
 #include <spdlog/spdlog.h>
 #include <LibClient.hpp>
 
-class AI {
+    class AI : public libclient::Callback {
     public:
-        AI(std::string address, uint16_t port, const std::string &name, unsigned int verbosity,
+        AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
            unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
 
-        void welcomed();
+        void onHelloReply() override;
 
-        void itemChoice();
+        void onGameStarted() override;
 
-        void equipmentChoice();
+        void onRequestItemChoice() override;
 
-        void gameStatus();
+        void onRequestEquipmentChoice() override;
 
-        void gameOperation();
+        void onGameStatus() override;
 
-        void statistics();
+        void onRequestGameOperation() override;
 
-        void metaInformation();
+        [[noreturn]] void onStatistics() override;
 
-        void strike();
+        void onGameLeft() override;
 
-        void error();
+        void onGamePause() override;
 
-        void replay();
+        void onMetaInformation() override;
 
-        void connectionLost();
+        void onStrike() override;
+
+        void onError() override;
+
+        void onReplay() override;
+
+        void connectionLost() override;
+
+        void wrongDestination() override;
 
     private:
         std::string address;
@@ -42,7 +50,7 @@ class AI {
         unsigned int difficulty;
         unsigned int maxReconnect;
 
-        std::optional<libclient::LibClient> libClientHandler;
+        libclient::LibClient libClientHandler;
         std::optional<spy::MatchConfig> matchConfig;
         std::optional<spy::scenario::Scenario> scenarioConfig;
         std::optional<std::vector<spy::character::CharacterInformation>> characterConfig;
