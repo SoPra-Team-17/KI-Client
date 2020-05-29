@@ -26,12 +26,12 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
 
 void AI::connect() {
     // connect to server as AI
-    if (!libClientHandler->network.connect(address, port)) {
+    if (!libClientHandler.network.connect(address, port)) {
         spdlog::critical("could not connect to server");
         exit(2);
     }
     spdlog::info("connected to server");
-    if (!libClientHandler->network.sendHello(name, spy::network::RoleEnum::AI)) {
+    if (!libClientHandler.network.sendHello(name, spy::network::RoleEnum::AI)) {
         spdlog::critical("could not send Hello message");
         exit(2);
     }
@@ -40,7 +40,7 @@ void AI::connect() {
 
 void AI::requestConfigs() {
     using namespace spy::network::messages;
-    if (!libClientHandler->network.sendRequestMetaInformation(
+    if (!libClientHandler.network.sendRequestMetaInformation(
             {MetaInformationKey::CONFIGURATION_MATCH_CONFIG, MetaInformationKey::CONFIGURATION_SCENARIO,
              MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION})) {
         spdlog::critical("could not send RequestMetaInformation message for configs");
@@ -69,11 +69,11 @@ void AI::onRequestItemChoice() {
         requestConfigs();
         return;
     }
-    auto choice = ItemChoice_gen::generate(difficulty, libClientHandler->getOfferedCharacters(),
-                                           libClientHandler->getOfferedGadgets(), matchConfig.value(),
+    auto choice = ItemChoice_gen::generate(difficulty, libClientHandler.getOfferedCharacters(),
+                                           libClientHandler.getOfferedGadgets(), matchConfig.value(),
                                            scenarioConfig.value(),
                                            characterConfig.value());
-    if (!libClientHandler->network.sendItemChoice(choice)) {
+    if (!libClientHandler.network.sendItemChoice(choice)) {
         spdlog::critical("could not send ItemChoice_gen message");
         exit(2);
     }
@@ -83,11 +83,11 @@ void AI::onRequestItemChoice() {
 void AI::onRequestEquipmentChoice() {
     spdlog::info("received RequestEquipmentChoice message");
 
-    auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler->getChosenCharacters(),
-                                                   libClientHandler->getChosenGadgets(), matchConfig.value(),
+    auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler.getChosenCharacters(),
+                                                   libClientHandler.getChosenGadgets(), matchConfig.value(),
                                                    scenarioConfig.value(),
                                                    characterConfig.value());
-    if (!libClientHandler->network.sendEquipmentChoice(equipment)) {
+    if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
         spdlog::critical("could not send EquipmentChoice_gen message");
         exit(2);
     }
@@ -103,9 +103,9 @@ void AI::onGameStatus() {
 void AI::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
 
-    auto operation = GameOperation_gen::generate(difficulty, libClientHandler->getActiveCharacter(),
-                                                 libClientHandler->getState(), matchConfig.value());
-    if (!libClientHandler->network.sendGameOperation(operation, matchConfig.value())) {
+    auto operation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
+                                                 libClientHandler.getState(), matchConfig.value());
+    if (!libClientHandler.network.sendGameOperation(operation, matchConfig.value())) {
         spdlog::critical("could not send GameOperation_gen message");
         exit(2);
     }
@@ -136,14 +136,14 @@ void AI::onMetaInformation() {
     spdlog::info("received MetaInformation message");
 
     using namespace spy::network::messages;
-    auto infoMap = libClientHandler->getInformation();
+    auto infoMap = libClientHandler.getInformation();
     matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
     scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
     characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
 
     if (configsWereNotAvailable) {
         configsWereNotAvailable = false;
-        itemChoice();
+        onRequestItemChoice();
     }
 }
 
