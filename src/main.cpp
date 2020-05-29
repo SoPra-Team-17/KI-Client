@@ -5,7 +5,10 @@
  */
 
 #include <CLI/CLI.hpp>
+#include "util/CLIValidator.hpp"
 #include <spdlog/spdlog.h>
+#include <thread>
+#include "AI.hpp"
 
 constexpr unsigned int maxVerbosity = spdlog::level::level_enum::n_levels;
 constexpr unsigned int maxDifficulty = 1;
@@ -14,18 +17,6 @@ constexpr uint16_t defaultPort = 7007;
 constexpr unsigned int defaultVerbosity = 5;
 constexpr auto defaultName = "ki017";
 constexpr unsigned int defaultDifficulty = maxDifficulty;
-
-class StringLengthTwo : public CLI::Validator {
-    public:
-        StringLengthTwo() : Validator() {
-            func_ = [](std::string &str) {
-                if(str.length() < 2) {
-                    return std::string("String has to contain min. two characters: ") + str + ')';
-                }
-                return std::string();
-            };
-        }
-};
 
 int main(int argc, char *argv[]) {
     CLI::App app;
@@ -40,12 +31,12 @@ int main(int argc, char *argv[]) {
     std::string name = defaultName;
     unsigned int difficulty = defaultDifficulty;
 
-    app.add_option("--address,-a", address, "IP address of server to connect to")->required()->check(CLI::ValidIPV4);
+    app.add_option("--address,-a", address, "IP address of server to connect to")->required()->check(CLI::validate::IPAddress());
     app.add_option("--x", keyValueStrings, "Additional key value pairs");
     app.add_option("--port,-p", port, "Port of server to connect to")->check(CLI::PositiveNumber);
     app.add_option("--verbosity,-v", verbosity, "Logging verbosity")->check(CLI::Range(maxVerbosity));
-    app.add_option("--name,-n", name, "Name of KI to be shown in game")->check(StringLengthTwo());
-    app.add_option("--difficulty,-d", difficulty, "Difficulty of KI")->check(CLI::Range(maxDifficulty));
+    app.add_option("--name,-n", name, "Name of AI to be shown in game")->check(CLI::validate::StringLengthTwo());
+    app.add_option("--difficulty,-d", difficulty, "Difficulty of AI")->check(CLI::Range(maxDifficulty));
 
     try {
         app.parse(argc, argv);
@@ -62,5 +53,12 @@ int main(int argc, char *argv[]) {
         additionalOptions[keyValueStrings.at(i)] = keyValueStrings.at(i + 1);
     }
 
-    return 0;
+    // start ki
+    AI ki(address, port, name, verbosity, difficulty, additionalOptions);
+
+    // "stay alive"
+    std::this_thread::sleep_until(
+            std::chrono::system_clock::now() + std::chrono::hours(std::numeric_limits<int>::max()));
+
+    std::exit(0);
 }
