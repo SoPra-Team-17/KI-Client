@@ -8,7 +8,7 @@
 #include "util/CLIValidator.hpp"
 #include <spdlog/spdlog.h>
 #include <thread>
-#include "AI.hpp"
+#include "AIController.hpp"
 
 constexpr unsigned int maxVerbosity = spdlog::level::level_enum::n_levels;
 constexpr unsigned int maxDifficulty = 1;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     }
 
     // start ki
-    AI ki(address, port, name, verbosity, difficulty, additionalOptions);
+    AIController ki(address, port, name, verbosity, difficulty, additionalOptions);
 
     // "stay alive"
     std::this_thread::sleep_until(

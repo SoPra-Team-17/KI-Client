@@ -4,7 +4,7 @@ project(ki017)
 set(SOURCE
         main.cpp
         AI.cpp
-        AICallback.cpp
+        AIController.cpp
         util/Logging.cpp
         generate/ItemChoice.cpp
         generate/EquipmentChoice.cpp

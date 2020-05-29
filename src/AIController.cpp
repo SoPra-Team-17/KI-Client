@@ -2,81 +2,92 @@
 // Created by Carolin on 16.05.2020.
 //
 
-#include "AICallback.hpp"
+#include "AIController.hpp"
+
+#include <utility>
 
 
-AICallback::AICallback(AI &ai) : ai(ai) {}
+AIController::AIController(AI &ai) : ai(ai) {}
 
-void AICallback::onHelloReply() {
+void AIController::onHelloReply() {
     spdlog::info("received HelloReply message");
     // do nothing
 }
 
-void AICallback::onGameStarted() {
+void AIController::onGameStarted() {
     spdlog::info("received GameStarted message");
     // do nothing
 }
 
-void AICallback::onRequestItemChoice() {
+void AIController::onRequestItemChoice() {
     spdlog::info("received RequestItemChoice message");
     ai.itemChoice();
 }
 
-void AICallback::onRequestEquipmentChoice() {
+void AIController::onRequestEquipmentChoice() {
     spdlog::info("received RequestEquipmentChoice message");
     ai.equipmentChoice();
 }
 
-void AICallback::onGameStatus() {
+void AIController::onGameStatus() {
     spdlog::info("received GameStatus message");
     ai.gameStatus();
 }
 
-void AICallback::onRequestGameOperation() {
+void AIController::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
     ai.gameOperation();
 }
 
-void AICallback::onStatistics() {
+void AIController::onStatistics() {
     spdlog::info("received Statistics message");
     ai.statistics();
 }
 
-void AICallback::onGameLeft() {
+void AIController::onGameLeft() {
     spdlog::info("received GameLeft message");
     // do nothing (next message is Statistics message)
 }
 
-void AICallback::onGamePause() {
+void AIController::onGamePause() {
     spdlog::info("received GamePause message");
     // do nothing
 }
 
-void AICallback::onMetaInformation() {
+void AIController::onMetaInformation() {
     spdlog::info("received MetaInformation message");
     ai.metaInformation();
 }
 
-void AICallback::onStrike() {
+void AIController::onStrike() {
     spdlog::info("received Strike message");
     ai.strike();
 }
 
-void AICallback::onError() {
+void AIController::onError() {
     spdlog::info("received Error message");
     ai.error();
 }
 
-void AICallback::onReplay() {
+void AIController::onReplay() {
     spdlog::info("received Replay message");
 }
 
-void AICallback::connectionLost() {
+void AIController::connectionLost() {
     spdlog::info("received connection lost callback");
     ai.connectionLost();
 }
 
-void AICallback::wrongDestination() {
+void AIController::wrongDestination() {
     spdlog::debug("received message that was not meant for me");
     // do nothing
 }
+
+AIController::AIController(const std::string &address,
+                           uint16_t port,
+                           const std::string &name,
+                           unsigned int verbosity,
+                           unsigned int difficulty,
+                           std::map<std::string, std::string> additionalOptions) :
+        libClientHandler{this},
+        ai{address, port, name, verbosity, difficulty, std::move(additionalOptions)} {}

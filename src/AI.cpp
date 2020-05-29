@@ -7,13 +7,17 @@
 #include <generate/ItemChoice.hpp>
 #include <generate/EquipmentChoice.hpp>
 #include <generate/GameOperation.hpp>
+#include <utility>
 #include "util/Logging.hpp"
-#include "AICallback.hpp"
+#include "AIController.hpp"
 
-AI::AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
-       unsigned int difficulty,
-       std::map<std::string, std::string> additionalOptions) : address(address), port(port), name(name),
-                                                               difficulty(difficulty), libClientHandler{std::dynamic_pointer_cast<libclient::Callback>(std::make_shared<AICallback>(*this))} {
+AI::AI(std::string address, uint16_t port,
+       std::string name, unsigned int verbosity, unsigned int difficulty,
+       std::map<std::string, std::string> additionalOptions,
+       libclient::LibClient &client) :
+        address(std::move(address)), port(port),
+        name(std::move(name)), difficulty(difficulty),
+        libClientHandler{client} {
 
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;

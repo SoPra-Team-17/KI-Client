@@ -10,8 +10,8 @@
 
 class AI {
     public:
-        AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
-           unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
+        AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
+           unsigned int difficulty, std::map<std::string, std::string> additionalOptions, libclient::LibClient &client);
 
         void itemChoice();
 
@@ -38,7 +38,7 @@ class AI {
         unsigned int difficulty;
         unsigned int maxReconnect;
 
-        libclient::LibClient libClientHandler;
+        libclient::LibClient &libClientHandler;
         spy::MatchConfig matchConfig;
 
         void connect();
