@@ -8,28 +8,40 @@
 #include <spdlog/spdlog.h>
 #include <LibClient.hpp>
 
-class AI {
+    class AI : public libclient::Callback {
     public:
-        AI(const std::string &address, uint16_t port, const std::string &name, unsigned int verbosity,
+        AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
            unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
 
-        void itemChoice();
+        void onHelloReply() override;
 
-        void equipmentChoice();
+        void onGameStarted() override;
 
-        void gameStatus();
+        void onRequestItemChoice() override;
 
-        void gameOperation();
+        void onRequestEquipmentChoice() override;
 
-        void statistics();
+        void onGameStatus() override;
 
-        void metaInformation();
+        void onRequestGameOperation() override;
 
-        void strike();
+        void onStatistics() override;
 
-        void error();
+        void onGameLeft() override;
 
-        void connectionLost();
+        void onGamePause() override;
+
+        void onMetaInformation() override;
+
+        void onStrike() override;
+
+        void onError() override;
+
+        void onReplay() override;
+
+        void connectionLost() override;
+
+        void wrongDestination() override;
 
     private:
         std::string address;
