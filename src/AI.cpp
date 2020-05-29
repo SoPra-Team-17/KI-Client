@@ -65,7 +65,7 @@ void AI::onRequestItemChoice() {
   
     if (!matchConfig.has_value() || !scenarioConfig.has_value() || !characterConfig.has_value()) {
         spdlog::error("configs for item choice are not available");
-        configsWereNotAvailable = true;
+        itemChoiceRequested = true;
         requestConfigs();
         return;
     }
@@ -139,9 +139,10 @@ void AI::onMetaInformation() {
         scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
         characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(
                 infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
-
-        if (configsWereNotAvailable) {
-            configsWereNotAvailable = false;
+        
+        configsInProgress = false;
+        if (itemChoiceRequested) {
+            itemChoiceRequested = false;
             onRequestItemChoice();
         }
     } catch (std::out_of_range &e) {
