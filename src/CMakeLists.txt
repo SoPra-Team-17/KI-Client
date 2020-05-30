@@ -5,12 +5,12 @@ set(SOURCE
         main.cpp
         AI.cpp
         util/Logging.cpp
-        generate/ItemChoice.cpp
-        generate/EquipmentChoice.cpp
-        generate/GameOperation.cpp
-        generate/random/ItemChoice.cpp
-        generate/random/EquipmentChoice.cpp
-        generate/random/GameOperation.cpp
+        generate/ItemChoice_gen.cpp
+        generate/EquipmentChoice_gen.cpp
+        generate/GameOperation_gen.cpp
+        generate/random/ItemChoice_random.cpp
+        generate/random/EquipmentChoice_random.cpp
+        generate/random/GameOperation_random.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

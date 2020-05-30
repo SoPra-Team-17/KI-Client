@@ -2,7 +2,7 @@
 // Created by Carolin on 16.05.2020.
 //
 
-#include <iostream>
+
 #include "Logging.hpp"
 
 void Logging::initLogging(unsigned int verbosity) {

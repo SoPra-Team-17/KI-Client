@@ -4,9 +4,10 @@
 
 #include "AI.hpp"
 
-#include <generate/ItemChoice.hpp>
-#include <generate/EquipmentChoice.hpp>
-#include <generate/GameOperation.hpp>
+#include <generate/ItemChoice_gen.hpp>
+#include <generate/EquipmentChoice_gen.hpp>
+#include <generate/GameOperation_gen.hpp>
+#include <utility>
 #include "util/Logging.hpp"
 
 AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
@@ -14,7 +15,6 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
        std::map<std::string, std::string> additionalOptions) : address(std::move(address)), port(port),
                                                                name(std::move(name)),
                                                                difficulty(difficulty), libClientHandler{this} {
-
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
 
@@ -27,22 +27,32 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
 void AI::connect() {
     // connect to server as AI
     if (!libClientHandler.network.connect(address, port)) {
-        spdlog::critical("could not connect to server");
-        std::exit(2);
+        throw std::runtime_error{"could not connect to server"};
     }
     spdlog::info("connected to server");
     if (!libClientHandler.network.sendHello(name, spy::network::RoleEnum::AI)) {
-        spdlog::critical("could not send Hello message");
-        std::exit(2);
+        throw std::runtime_error{"could not send Hello message"};
     }
     spdlog::info("send Hello message");
+}
 
-    // TODO make sure that matchConfig is available
+void AI::requestConfigs() {
+    if (!configsInProgress) {
+        using namespace spy::network::messages;
+        if (!libClientHandler.network.sendRequestMetaInformation(
+                {MetaInformationKey::CONFIGURATION_MATCH_CONFIG, MetaInformationKey::CONFIGURATION_SCENARIO,
+                 MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION})) {
+            throw std::runtime_error{"could not send RequestMetaInformation message for configs"};
+        }
+        configsInProgress = true;
+        spdlog::info("send RequestMetaInformation message for configs");
+    }
 }
 
 void AI::onHelloReply() {
     spdlog::info("received HelloReply message");
-    // do nothing
+    
+    requestConfigs();
 }
 
 void AI::onGameStarted() {
@@ -52,12 +62,19 @@ void AI::onGameStarted() {
 
 void AI::onRequestItemChoice() {
     spdlog::info("received RequestItemChoice message");
-
-    auto choice = ItemChoice::generate(difficulty, libClientHandler.getOfferedCharacters(),
-                                       libClientHandler.getOfferedGadgets(), matchConfig);
+  
+    if (!matchConfig.has_value() || !scenarioConfig.has_value() || !characterConfig.has_value()) {
+        spdlog::error("configs for item choice are not available");
+        itemChoiceRequested = true;
+        requestConfigs();
+        return;
+    }
+    auto choice = ItemChoice_gen::generate(difficulty, libClientHandler.getOfferedCharacters(),
+                                           libClientHandler.getOfferedGadgets(), matchConfig.value(),
+                                           scenarioConfig.value(),
+                                           characterConfig.value());
     if (!libClientHandler.network.sendItemChoice(choice)) {
-        spdlog::critical("could not send ItemChoice message");
-        std::exit(2);
+        throw std::runtime_error{"could not send ItemChoice_gen message"};
     }
     spdlog::info("sent ItemChoice message");
 }
@@ -65,11 +82,12 @@ void AI::onRequestItemChoice() {
 void AI::onRequestEquipmentChoice() {
     spdlog::info("received RequestEquipmentChoice message");
 
-    auto equipment = EquipmentChoice::generate(difficulty, libClientHandler.getChosenCharacters(),
-                                               libClientHandler.getChosenGadgets(), matchConfig);
+    auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler.getChosenCharacters(),
+                                                   libClientHandler.getChosenGadgets(), matchConfig.value(),
+                                                   scenarioConfig.value(),
+                                                   characterConfig.value());
     if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
-        spdlog::critical("could not send EquipmentChoice message");
-        std::exit(2);
+        throw std::runtime_error{"could not send EquipmentChoice_gen message"};
     }
     spdlog::info("sent EquipmentChoice message");
 }
@@ -77,17 +95,16 @@ void AI::onRequestEquipmentChoice() {
 void AI::onGameStatus() {
     spdlog::info("received GameStatus message");
 
-    // TODO save additional info (can this be done in LibClient to help Client too) ?
+    // additional info could be saved here (can this be done in LibClient to help Client too) ?
 }
 
 void AI::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
 
-    auto operation = GameOperation::generate(difficulty, libClientHandler.getActiveCharacter(),
-                                             libClientHandler.getState(), matchConfig);
-    if (!libClientHandler.network.sendGameOperation(operation, matchConfig)) {
-        spdlog::critical("could not send GameOperation message");
-        std::exit(2);
+    auto operation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
+                                                 libClientHandler.getState(), matchConfig.value());
+    if (!libClientHandler.network.sendGameOperation(operation, matchConfig.value())) {
+        throw std::runtime_error{"could not send GameOperation_gen message"};
     }
     spdlog::info("sent GameOperation message");
 }
@@ -95,7 +112,7 @@ void AI::onRequestGameOperation() {
 void AI::onStatistics() {
     spdlog::info("received Statistics message");
 
-    // TODO use as additional info ?
+    // additional info (for next runs) could be saved here
     std::string endString = "Game ";
     endString += libClientHandler.getWinner().value() == libClientHandler.getId().value() ? "won!" : "lost!";
     spdlog::info(endString);
@@ -115,64 +132,75 @@ void AI::onGamePause() {
 void AI::onMetaInformation() {
     spdlog::info("received MetaInformation message");
 
-    // TODO what to do with received information ?
-    // TODO MatchConfig is needed !!!
+    using namespace spy::network::messages;
+    auto infoMap = libClientHandler.getInformation();
+    try {
+        matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+        scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
+        characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(
+                infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+        
+        configsInProgress = false;
+        if (itemChoiceRequested) {
+            itemChoiceRequested = false;
+            onRequestItemChoice();
+        }
+    } catch (std::out_of_range &e) {
+        requestConfigs();
+    }
 }
 
 void AI::onStrike() {
     spdlog::info("received Strike message");
 
+    configsInProgress = false;
     spdlog::warn("ki caused a strike");
 }
 
 void AI::onError() {
     spdlog::info("received Error message");
 
+    configsInProgress = false;
     switch (libClientHandler.getErrorReason().value()) {
         case spy::network::ErrorTypeEnum::NAME_NOT_AVAILABLE:
             spdlog::error("error type is name not available");
             if (name == "ki017") {
-                spdlog::critical("default name is not available");
-                std::exit(1);
+                throw std::runtime_error{"default name is not available"};
             }
             name = "ki017";
             connect();
             break;
         case spy::network::ErrorTypeEnum::ALREADY_SERVING:
-            spdlog::critical("error type is already serving");
-            std::exit(1);
+            throw std::runtime_error{"error type is already serving"};
         case spy::network::ErrorTypeEnum::SESSION_DOES_NOT_EXIST:
-            spdlog::critical("error type is session does not exist");
-            std::exit(1);
+            throw std::runtime_error{"error type is session does not exist"};
         case spy::network::ErrorTypeEnum::ILLEGAL_MESSAGE:
-            spdlog::critical("error type is illegal message");
-            std::exit(1);
+            throw std::runtime_error{"error type is illegal message"};
         case spy::network::ErrorTypeEnum::TOO_MANY_STRIKES:
-            spdlog::critical("error type is too many strikes");
-            std::exit(1);
+            throw std::runtime_error{"error type is too many strikes"};
         case spy::network::ErrorTypeEnum::GENERAL:
             [[fallthrough]];
         default:
-            spdlog::critical("error type is general or unknown");
-            std::exit(1);
+            throw std::runtime_error{"error type is general or unknown"};
     }
 }
 
 void AI::onReplay() {
-    spdlog::info("received Replay message");
+    spdlog::debug("received Replay message");
+    // do nothing
 }
 
 void AI::connectionLost() {
     spdlog::info("received connection lost callback");
 
+    configsInProgress = false;
     for (unsigned int i = 0; i < maxReconnect; i++) {
         if (libClientHandler.network.sendReconnect()) {
             spdlog::info("sent Reconnect message");
             return;
         }
     }
-    spdlog::critical("could not reconnect");
-    std::exit(2);
+    throw std::runtime_error{"could not reconnect"};
 }
 
 void AI::wrongDestination() {
