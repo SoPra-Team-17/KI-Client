@@ -8,7 +8,8 @@
 #include <spdlog/spdlog.h>
 #include <LibClient.hpp>
 
-    class AI : public libclient::Callback {
+
+class AI : public libclient::Callback {
     public:
         AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
            unsigned int difficulty, std::map<std::string, std::string> additionalOptions);
@@ -54,7 +55,8 @@
         std::optional<spy::MatchConfig> matchConfig;
         std::optional<spy::scenario::Scenario> scenarioConfig;
         std::optional<std::vector<spy::character::CharacterInformation>> characterConfig;
-        bool configsWereNotAvailable = false;
+        bool itemChoiceRequested = false;
+        bool configsInProgress = false;
 
         void connect();
         void requestConfigs();
