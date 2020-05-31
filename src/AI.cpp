@@ -15,6 +15,7 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
        std::map<std::string, std::string> additionalOptions) : address(std::move(address)), port(port),
                                                                name(std::move(name)),
                                                                difficulty(difficulty), libClientHandler{this} {
+
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
 
@@ -51,7 +52,7 @@ void AI::requestConfigs() {
 
 void AI::onHelloReply() {
     spdlog::info("received HelloReply message");
-    
+
     requestConfigs();
 }
 
@@ -62,7 +63,7 @@ void AI::onGameStarted() {
 
 void AI::onRequestItemChoice() {
     spdlog::info("received RequestItemChoice message");
-  
+
     if (!matchConfig.has_value() || !scenarioConfig.has_value() || !characterConfig.has_value()) {
         spdlog::error("configs for item choice are not available");
         itemChoiceRequested = true;
@@ -139,7 +140,7 @@ void AI::onMetaInformation() {
         scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
         characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(
                 infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
-        
+
         configsInProgress = false;
         if (itemChoiceRequested) {
             itemChoiceRequested = false;

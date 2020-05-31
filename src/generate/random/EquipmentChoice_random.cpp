@@ -3,10 +3,10 @@
 //
 
 #include "../EquipmentChoice_gen.hpp"
+#include <gameLogic/generation/EquipmentChoiceGenerator.hpp>
 
 std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>
-EquipmentChoice_gen::random(const std::vector<spy::util::UUID> &/*chosenCharacterIds*/,
-                            const std::vector<spy::gadget::GadgetEnum> &/*chosenGadgets*/) {
-    // TODO implement
-    return std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>();
+EquipmentChoice_gen::random(const std::vector<spy::util::UUID> &chosenCharacterIds,
+                            const std::vector<spy::gadget::GadgetEnum> &chosenGadgets) {
+    return spy::gameplay::EquipmentChoiceGenerator::getRandomEquipmentChoice(chosenCharacterIds, chosenGadgets);
 }
