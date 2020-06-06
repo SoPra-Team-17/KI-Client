@@ -139,7 +139,7 @@ void AI::onMetaInformation() {
         matchConfig = std::get<spy::MatchConfig>(infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
         scenarioConfig = std::get<spy::scenario::Scenario>(infoMap.at(MetaInformationKey::CONFIGURATION_SCENARIO));
         characterConfig = std::get<std::vector<spy::character::CharacterInformation>>(
-                infoMap.at(MetaInformationKey::CONFIGURATION_MATCH_CONFIG));
+                infoMap.at(MetaInformationKey::CONFIGURATION_CHARACTER_INFORMATION));
 
         configsInProgress = false;
         if (itemChoiceRequested) {
