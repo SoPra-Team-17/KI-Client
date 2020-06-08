@@ -17,4 +17,4 @@ RUN mkdir build
 RUN cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN cd build && make -j$(nproc)
 
-ENTRYPOINT /ki/build/src/ki017
+ENTRYPOINT ["/ki/build/src/ki017"]
