@@ -66,7 +66,6 @@ or
 ```
 make run AIFLAGS="-a 127.0.0.1"
 ```
-Note: docker container seems not to accept IPV6 addresses
 
 ## Usage
 Flags for the AI-Client startup:
