@@ -50,15 +50,23 @@ docker pull soprateam17/ki-client
 ```
 
 ### Running the container
-There are no predefined parameters in the entrypoint of the container, so you have to at least set the server ip address
-by using the `-a` flag. Here we connect to a server running on localhost (with default port).
+Test the docker container by executing it.
 ```
-docker run --rm --net=host soprateam17/ki-client -a ::1
+docker run --rm --net=host soprateam17/ki-client -h
 ```
 or
 ```
-make run -a ::1
+make run
 ```
+To set flags like the server address (e.g. localhost) use:
+```
+docker run --rm --net=host soprateam17/ki-client -a 127.0.0.1
+```
+or
+```
+make run AIFLAGS="-a 127.0.0.1"
+```
+Note: docker container seems not to accept IPV6 addresses
 
 ## Usage
 Flags for the AI-Client startup:
