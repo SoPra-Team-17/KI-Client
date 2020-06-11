@@ -31,7 +31,7 @@ namespace spy::gameplay {
             // TODO: add evaluation variables here (have to be set by execute)
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
-                                                         const spy::MatchConfig &config);
+                                                         const spy::MatchConfig &config) const;
 
         private:
             [[nodiscard]] std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,

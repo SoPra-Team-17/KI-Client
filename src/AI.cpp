@@ -75,7 +75,7 @@ void AI::onRequestItemChoice() {
                                            scenarioConfig.value(),
                                            characterConfig.value());
     if (!libClientHandler.network.sendItemChoice(choice)) {
-        throw std::runtime_error{"could not send ItemChoice_gen message"};
+        throw std::runtime_error{"could not send ItemChoice message"};
     }
     spdlog::info("sent ItemChoice message");
 }
@@ -88,7 +88,7 @@ void AI::onRequestEquipmentChoice() {
                                                    scenarioConfig.value(),
                                                    characterConfig.value());
     if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
-        throw std::runtime_error{"could not send EquipmentChoice_gen message"};
+        throw std::runtime_error{"could not send EquipmentChoice message"};
     }
     spdlog::info("sent EquipmentChoice message");
 }
@@ -107,7 +107,7 @@ void AI::onRequestGameOperation() {
                                                      libClientHandler.getState(), matchConfig.value());
     }
     if (!libClientHandler.network.sendGameOperation(nextOperations[0], matchConfig.value())) {
-        throw std::runtime_error{"could not send GameOperation_gen message"};
+        throw std::runtime_error{"could not send GameOperation message"};
     }
     nextOperations.erase(nextOperations.begin());
     spdlog::info("sent GameOperation message");

@@ -3,18 +3,27 @@
 //
 
 #include "State_AI.hpp"
+#include "generate/OperationGenerator.hpp"
+#include "execute/OperationExecutor.hpp"
 
 namespace spy::gameplay {
 
-    std::vector<State_AI> State_AI::getSuccessorStates(const util::UUID &/*characterId*/,
-                                                       const spy::MatchConfig &/*config*/) const {
-        // TODO implement getSuccessorStates method
-        return {};
+    std::vector<State_AI> State_AI::getSuccessorStates(const util::UUID &characterId,
+                                                       const spy::MatchConfig &config) const {
+        std::vector<State_AI> successors;
+        auto operations = OperationGenerator::generate(*this, characterId, config);
+
+        for (const auto &op: operations) {
+            auto successorStates = OperationExecutor::execute(*this, op, config);
+            successors.insert(successors.end(), successorStates.begin(), successorStates.end());
+        }
+
+        return successors;
     }
 
     std::vector<State_AI>
     State_AI::getLeafSuccessorStates(const util::UUID &characterId,
-                                     const spy::MatchConfig &config) {
+                                     const spy::MatchConfig &config) const {
         std::vector<State_AI> leafSuccessors;
         std::vector<State_AI> successors = {*this};
 
