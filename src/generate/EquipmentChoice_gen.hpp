@@ -25,7 +25,14 @@ class EquipmentChoice_gen {
 
     private:
         static std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>
-        random(const std::vector<spy::util::UUID> &chosenCharacterIds, const std::vector<spy::gadget::GadgetEnum> &chosenGadgets);
+        random(const std::vector<spy::util::UUID> &chosenCharacterIds,
+               const std::vector<spy::gadget::GadgetEnum> &chosenGadgets);
+
+        static std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>
+        caro(const std::vector <spy::util::UUID> &chosenCharacterIds,
+             const std::vector<spy::gadget::GadgetEnum> &chosenGadgets, const spy::MatchConfig &config,
+             const spy::scenario::Scenario &scenarioConfig,
+             const std::vector<spy::character::CharacterInformation> &characterConfig);
 };
 
 #endif //KICLIENT_EQUIPMENTCHOICE_GEN_HPP

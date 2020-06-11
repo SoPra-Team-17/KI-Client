@@ -102,11 +102,14 @@ void AI::onGameStatus() {
 void AI::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
 
-    auto operation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
-                                                 libClientHandler.getState(), matchConfig.value());
-    if (!libClientHandler.network.sendGameOperation(operation, matchConfig.value())) {
+    if (nextOperations.empty()) {
+        nextOperations = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
+                                                     libClientHandler.getState(), matchConfig.value());
+    }
+    if (!libClientHandler.network.sendGameOperation(nextOperations[0], matchConfig.value())) {
         throw std::runtime_error{"could not send GameOperation_gen message"};
     }
+    nextOperations.erase(nextOperations.begin());
     spdlog::info("sent GameOperation message");
 }
 

@@ -25,7 +25,14 @@ class ItemChoice_gen {
 
     private:
         static std::variant<spy::util::UUID, spy::gadget::GadgetEnum>
-        random(const std::vector<spy::util::UUID> &offeredCharacterIds, const std::vector<spy::gadget::GadgetEnum> &offeredGadgets);
+        random(const std::vector<spy::util::UUID> &offeredCharacterIds,
+               const std::vector<spy::gadget::GadgetEnum> &offeredGadgets);
+
+        static std::variant<spy::util::UUID, spy::gadget::GadgetEnum>
+        caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
+             const std::vector<spy::gadget::GadgetEnum> &offeredGadgets, const spy::MatchConfig &config,
+             const spy::scenario::Scenario &scenarioConfig,
+             const std::vector<spy::character::CharacterInformation> &characterConfig);
 };
 
 #endif //KICLIENT_ITEMCHOICE_GEN_HPP

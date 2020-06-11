@@ -11,6 +11,11 @@ set(SOURCE
         generate/random/ItemChoice_random.cpp
         generate/random/EquipmentChoice_random.cpp
         generate/random/GameOperation_random.cpp
+        generate/caro/ItemChoice_caro.cpp
+        generate/caro/EquipmentChoice_caro.cpp
+        generate/caro/GameOperation_caro.cpp
+        generate/caro/evalFunctions_caro.cpp
+        generate/utils/State_AI.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
