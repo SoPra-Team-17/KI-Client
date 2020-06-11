@@ -27,14 +27,15 @@ namespace spy::gameplay {
 
             double stateChance = 1;
             std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsLeadingToState;
+            bool isLeafState = false;
             // TODO: add evaluation variables here (have to be set by execute)
 
-            std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
+            [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                          const spy::MatchConfig &config);
 
         private:
-            std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,
-                                                     const spy::MatchConfig &config);
+            [[nodiscard]] std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,
+                                                     const spy::MatchConfig &config) const;
     };
 }
 
