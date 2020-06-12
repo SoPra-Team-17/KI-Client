@@ -13,10 +13,11 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
     auto endStates = state.getLeafSuccessorStates(characterId, config);
 
     std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsToExecute;
-    double endVal = -1;
+    double endVal = -std::numeric_limits<double>::infinity();
     for (const auto &endS: endStates) {
         double val = evalFunctions_caro::gameOperation(endS, characterId);
         if (val > endVal) {
+            endVal = val;
             operationsToExecute = endS.operationsLeadingToState;
         }
     }
