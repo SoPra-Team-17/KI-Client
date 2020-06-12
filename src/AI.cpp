@@ -8,6 +8,7 @@
 #include <generate/EquipmentChoice_gen.hpp>
 #include <generate/GameOperation_gen.hpp>
 #include <utility>
+#include <random>
 #include "util/Logging.hpp"
 
 AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbosity,
@@ -47,6 +48,10 @@ void AI::requestConfigs() {
         }
         configsInProgress = true;
         spdlog::info("send RequestMetaInformation message for configs");
+    }
+    std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::seconds(5));
+    if (!configsInProgress) {
+        requestConfigs();
     }
 }
 
@@ -102,10 +107,30 @@ void AI::onGameStatus() {
 void AI::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
 
+    auto waitTime = std::chrono::milliseconds(1000);
+    auto limit = matchConfig.value().getTurnPhaseLimit();
+    if (limit.has_value() && limit.value() > 1) {
+        waitTime = std::chrono::milliseconds((limit.value() - 1) * 1000);
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
     if (nextOperations.empty()) {
         nextOperations = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
                                                      libClientHandler.getState(), matchConfig.value());
     }
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+
+    if (waitTime - usedTime > std::chrono::milliseconds(1000)) {
+        auto diff = waitTime - usedTime;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<unsigned int> randTime(0, diff.count());
+        std::this_thread::sleep_for(std::chrono::milliseconds(randTime(gen)));
+    } else {
+        spdlog::warn("took too long to calculate");
+    }
+
     if (!libClientHandler.network.sendGameOperation(nextOperations[0], matchConfig.value())) {
         throw std::runtime_error{"could not send GameOperation_gen message"};
     }
@@ -197,12 +222,20 @@ void AI::onReplay() {
 void AI::connectionLost() {
     spdlog::info("received connection lost callback");
 
+    unsigned int waitTime = 1000;
+    auto limit = matchConfig.value().getReconnectLimit();
+    if (limit.has_value() && limit.value() > 1) {
+        waitTime = (limit.value() - 1) * 1000 / maxReconnect;
+    }
+
     configsInProgress = false;
     for (unsigned int i = 0; i < maxReconnect; i++) {
         if (libClientHandler.network.sendReconnect()) {
             spdlog::info("sent Reconnect message");
             return;
         }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
     }
     throw std::runtime_error{"could not reconnect"};
 }
