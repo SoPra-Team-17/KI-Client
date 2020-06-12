@@ -16,6 +16,8 @@ set(SOURCE
         generate/caro/GameOperation_caro.cpp
         generate/caro/evalFunctions_caro.cpp
         generate/utils/State_AI.cpp
+        generate/utils/generate/OperationGenerator.cpp
+        generate/utils/execute/OperationExecutor.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

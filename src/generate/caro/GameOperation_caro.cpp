@@ -17,6 +17,7 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
     for (const auto &endS: endStates) {
         double val = evalFunctions_caro::gameOperation(endS, characterId);
         if (val > endVal) {
+            endVal = val;
             operationsToExecute = endS.operationsLeadingToState;
         }
     }
