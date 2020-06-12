@@ -10,12 +10,17 @@ ItemChoice_gen::caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
                      const std::vector<spy::gadget::GadgetEnum> &offeredGadgets, const spy::MatchConfig &config,
                      const spy::scenario::Scenario &scenarioConfig,
                      const std::vector<spy::character::CharacterInformation> &characterConfig) {
+    double shift = 0;
+
     double midCharacterVal = 0;
     spy::util::UUID character;
     double characterVal = -std::numeric_limits<double>::infinity();
     for (const auto &id: offeredCharacterIds) {
         double val = evalFunctions_caro::itemChoice(id, config, scenarioConfig, characterConfig);
-        midCharacterVal += 1.0 + val;
+        midCharacterVal += val;
+        if (val < shift) {
+            shift = val;
+        }
         if (val > characterVal) {
             characterVal = val;
             character = id;
@@ -27,7 +32,10 @@ ItemChoice_gen::caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
     double gadgetVal = -std::numeric_limits<double>::infinity();
     for (const auto &type: offeredGadgets) {
         double val = evalFunctions_caro::itemChoice(type, config, scenarioConfig, characterConfig);
-        midGadgetVal += 1.0 + val;
+        midGadgetVal += val;
+        if (val < shift) {
+            shift = val;
+        }
         if (val > gadgetVal) {
             gadgetVal = val;
             gadget = type;
@@ -36,7 +44,7 @@ ItemChoice_gen::caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
 
     double correct = 1;
     if (midCharacterVal != 0 && midGadgetVal != 0) {
-        correct = midCharacterVal / midGadgetVal;
+        correct = (midCharacterVal - 3 * shift) / (midGadgetVal - 3 * shift); // shift is not positive
     }
     if (characterVal > gadgetVal * correct) {
         return character;
