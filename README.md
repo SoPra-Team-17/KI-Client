@@ -3,6 +3,18 @@ This repository contains the AI-Client component of team 17 for the
 *No Time To Spy* game of the Softwaregrundprojekt 2019/2020 at 
 the university of Ulm.
 
+## API
+The AI-Client provides an interface to the Choice and Operation generation methods via a library (SopraAI).
+To build and install the library execute the following commands:
+```
+mkdir build && cd build
+cmake ..
+make
+sudo make install
+```
+The library can be linked with `-lSopraAI`.
+ 
+
 ## Installation 
 The AI-Client can be installed manually and through a docker container. 
 
