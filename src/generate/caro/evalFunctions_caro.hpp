@@ -71,7 +71,7 @@ class evalFunctions_caro {
         static double numTradecraft;
         static double numObservation;
 
-        static double maxChipsInCasion;
+        static double maxChipsInCasino;
         static double chipsToIpJudge;
 };
 
