@@ -486,7 +486,7 @@ void evalFunctions_caro::setStaticVars(const spy::scenario::Scenario &scenarioCo
     }
 
     // mixed
-    maxChipsInCasion = config.getMaxChipsRoulette() * numRouletteTables;
+    maxChipsInCasino = config.getMaxChipsRoulette() * numRouletteTables;
     chipsToIpJudge = maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor()) /
                      ((numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) +
                       maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor()));
