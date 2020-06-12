@@ -41,7 +41,7 @@ double evalFunctions_caro::numFlapsAndSeals;
 double evalFunctions_caro::numTradecraft;
 double evalFunctions_caro::numObservation;
 
-double evalFunctions_caro::maxChipsInCasion;
+double evalFunctions_caro::maxChipsInCasino;
 double evalFunctions_caro::chipsToIpJudge;
 
 double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
