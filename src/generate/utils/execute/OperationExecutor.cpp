@@ -7,6 +7,6 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::execute(const spy::gameplay::State_AI &/*s*/, std::shared_ptr<spy::gameplay::BaseOperation> /*op*/,
                            const spy::MatchConfig &/*config*/) {
-    // TODO
+    // TODO implement
     return {};
 }
