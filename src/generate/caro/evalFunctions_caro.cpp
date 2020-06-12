@@ -322,7 +322,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
     }
 
 
-    // decide on character according to porperties
+    // decide on character according to properties
     spy::util::UUID retChar;
     double retVal = -std::numeric_limits<double>::infinity();
     for (const auto &characterId: chosenCharacterIds) {
@@ -493,4 +493,3 @@ void evalFunctions_caro::setStaticVars(const spy::scenario::Scenario &scenarioCo
 
     staticVarsSet = true;
 }
-
