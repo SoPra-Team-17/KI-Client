@@ -4,6 +4,46 @@
 
 #include "evalFunctions_caro.hpp"
 
+bool evalFunctions_caro::staticVarsSet;
+
+double evalFunctions_caro::maxPlayingFieldDim;
+double evalFunctions_caro::numBarTables;
+double evalFunctions_caro::numRouletteTables;
+double evalFunctions_caro::numWalls;
+double evalFunctions_caro::numFree;
+double evalFunctions_caro::numBarSeats;
+double evalFunctions_caro::numSafes;
+double evalFunctions_caro::numFireplaces;
+double evalFunctions_caro::numFields;
+
+double evalFunctions_caro::midChipsPerRoulette;
+double evalFunctions_caro::midChance;
+double evalFunctions_caro::midHitChanceWithDamage;
+double evalFunctions_caro::midRangeWithDamage;
+double evalFunctions_caro::midDamage;
+
+double evalFunctions_caro::numCharacter;
+double evalFunctions_caro::numNimbleness;
+double evalFunctions_caro::numSluggishness;
+double evalFunctions_caro::numPonderousness;
+double evalFunctions_caro::numSpryness;
+double evalFunctions_caro::numAgility;
+double evalFunctions_caro::numLuckyDevil;
+double evalFunctions_caro::numJinx;
+double evalFunctions_caro::numClammyClothes;
+double evalFunctions_caro::numConstantClammyClothes;
+double evalFunctions_caro::numRobustStomach;
+double evalFunctions_caro::numToughness;
+double evalFunctions_caro::numBabysitter;
+double evalFunctions_caro::numHoneyTrap;
+double evalFunctions_caro::numBangAndBurn;
+double evalFunctions_caro::numFlapsAndSeals;
+double evalFunctions_caro::numTradecraft;
+double evalFunctions_caro::numObservation;
+
+double evalFunctions_caro::maxChipsInCasion;
+double evalFunctions_caro::chipsToIpJudge;
+
 double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
                                       const spy::MatchConfig &config, const spy::scenario::Scenario &scenarioConfig,
                                       const std::vector<spy::character::CharacterInformation> &characterConfig) {
