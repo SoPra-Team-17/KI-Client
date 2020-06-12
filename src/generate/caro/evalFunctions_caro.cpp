@@ -149,7 +149,7 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                        static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM:
-                ret += numRouletteTables / numFields * chipsToIpJudge * midChipsPerRoulette / maxChipsInCasion * 1 /
+                ret += numRouletteTables / numFields * chipsToIpJudge * midChipsPerRoulette / maxChipsInCasino * 1 /
                        numRouletteTables;
                 break;
             case spy::gadget::GadgetEnum::BOWLER_BLADE:
