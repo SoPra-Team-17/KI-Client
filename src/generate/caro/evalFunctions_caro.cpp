@@ -71,11 +71,11 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                 case spy::character::PropertyEnum::SLUGGISHNESS:
                     ret -= 1 - numSluggishness / numCharacter;
                     break;
-                case spy::character::PropertyEnum::PONDEROUSNESS:
-                    ret += 1 - numPonderousness / numCharacter;
-                    break;
                 case spy::character::PropertyEnum::SPRYNESS:
-                    ret -= 1 - numSpryness / numCharacter;
+                    ret += 1 - numSpryness / numCharacter;
+                    break;
+                case spy::character::PropertyEnum::PONDEROUSNESS:
+                    ret -= 1 - numPonderousness / numCharacter;
                     break;
                 case spy::character::PropertyEnum::AGILITY:
                     ret += 1 - numAgility / numCharacter;
@@ -91,10 +91,10 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                     break;
                 case spy::character::PropertyEnum::BANG_AND_BURN:
                     if (props.find(spy::character::PropertyEnum::LUCKY_DEVIL) != props.end()) {
-                        ret += numRouletteTables / numFields * (1 - numBangAndBurn / numCharacter);
+                        ret -= numRouletteTables / numFields * (1 - numBangAndBurn / numCharacter);
                     }
                     if (props.find(spy::character::PropertyEnum::JINX) != props.end()) {
-                        ret -= numRouletteTables / numFields * (1 - numBangAndBurn / numCharacter);
+                        ret += numRouletteTables / numFields * (1 - numBangAndBurn / numCharacter);
                     }
                     break;
                     // chance
@@ -145,62 +145,69 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                 ret += midChance * (1 - config.getCocktailDodgeChance()) * numBarTables / numFields;
                 break;
             case spy::gadget::GadgetEnum::MOLEDIE:
-                ret -= std::min(1.0, (double) config.getMoledieRange() / maxPlayingFieldDim) * 1 /
-                       (double) config.getRoundLimit();
+                ret -= std::min(1.0, static_cast<double>(config.getMoledieRange() / maxPlayingFieldDim) * 1) /
+                       static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM:
                 ret += numRouletteTables / numFields * chipsToIpJudge * midChipsPerRoulette / maxChipsInCasion * 1 /
                        numRouletteTables;
                 break;
             case spy::gadget::GadgetEnum::BOWLER_BLADE:
-                ret += config.getBowlerBladeHitChance() * std::min(1.0, (double) config.getBowlerBladeDamage() / 100) *
-                       std::min(1.0, (double) config.getBowlerBladeRange() / maxPlayingFieldDim) * 1 /
-                       (double) config.getRoundLimit();
+                ret += config.getBowlerBladeHitChance() *
+                       std::min(1.0, static_cast<double>(config.getBowlerBladeDamage() / 100)) *
+                       std::min(1.0, static_cast<double>(config.getBowlerBladeRange() / maxPlayingFieldDim) * 1) /
+                       static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::MAGNETIC_WATCH:
-                ret += config.getBowlerBladeHitChance() * std::min(1.0, (double) config.getBowlerBladeDamage() / 100) *
-                       std::min(1.0, (double) config.getBowlerBladeRange() / maxPlayingFieldDim);
+                ret += config.getBowlerBladeHitChance() *
+                       std::min(1.0, static_cast<double>(config.getBowlerBladeDamage() / 100)) *
+                       std::min(1.0, static_cast<double>(config.getBowlerBladeRange() / maxPlayingFieldDim));
                 break;
             case spy::gadget::GadgetEnum::POISON_PILLS:
-                ret += std::min(1.0, (double) config.getCocktailHealthPoints() / 100) * numBarTables / numFields * 5 /
-                       (double) config.getRoundLimit();
+                ret += std::min(1.0,
+                                static_cast<double>(config.getCocktailHealthPoints() / 100) * numBarTables / numFields *
+                                5) /
+                       static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::LASER_COMPACT:
                 ret += config.getLaserCompactHitChance() * numBarTables / numFields;
                 break;
             case spy::gadget::GadgetEnum::ROCKET_PEN:
-                ret += std::min(1.0, (double) config.getRocketPenDamage() / 100) * 1 / (double) config.getRoundLimit();
+                ret += std::min(1.0, static_cast<double>(config.getRocketPenDamage() / 100) * 1 /
+                                     static_cast<double>(config.getRoundLimit()));
                 break;
             case spy::gadget::GadgetEnum::GAS_GLOSS:
-                ret += std::min(1.0, (double) config.getGasGlossDamage() / 100) * 1 / (double) config.getRoundLimit();
+                ret += std::min(1.0, static_cast<double>(config.getGasGlossDamage() / 100) * 1 /
+                                     static_cast<double>(config.getRoundLimit()));
                 break;
             case spy::gadget::GadgetEnum::MOTHBALL_POUCH:
-                ret += std::min(1.0, (double) config.getMothballPouchRange() / maxPlayingFieldDim) *
-                       std::min(1.0, (double) config.getMothballPouchDamage() / 100) *
-                       numFireplaces / numFields * 5 / (double) config.getRoundLimit();
+                ret += std::min(1.0, static_cast<double>(config.getMothballPouchRange() / maxPlayingFieldDim)) *
+                       std::min(1.0, static_cast<double>(config.getMothballPouchDamage() / 100)) *
+                       numFireplaces / numFields * 5 / static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::FOG_TIN:
-                ret += std::min(1.0, (double) config.getFogTinRange() / maxPlayingFieldDim) * 3 /
-                       (double) config.getRoundLimit();
+                ret += std::min(1.0, static_cast<double>(config.getFogTinRange() / maxPlayingFieldDim) * 3) /
+                       static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::GRAPPLE:
                 ret += config.getGrappleHitChance() *
-                       std::min(1.0, (double) config.getGrappleRange() / maxPlayingFieldDim);
+                       std::min(1.0, static_cast<double>(config.getGrappleRange() / maxPlayingFieldDim));
                 break;
             case spy::gadget::GadgetEnum::WIRETAP_WITH_EARPLUGS:
-                ret += (1 - config.getWiretapWithEarplugsFailChance()) * 1 / (double) config.getRoundLimit();
+                ret += (1 - config.getWiretapWithEarplugsFailChance()) * 1 /
+                       static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::JETPACK:
-                ret += 1 / (double) config.getRoundLimit();
+                ret += 1 / static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::CHICKEN_FEED:
-                ret += 2 / (numCharacter - 2) * 1 / (double) config.getRoundLimit();
+                ret += 2 / (numCharacter - 2) * 1 / static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::NUGGET:
-                ret += (1 - 4 / (numCharacter - 2)) * 1 / (double) config.getRoundLimit();
+                ret += (1 - 4 / (numCharacter - 2)) * 1 / static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::MIRROR_OF_WILDERNESS:
-                ret += config.getMirrorSwapChance() * 1 / (double) config.getRoundLimit();
+                ret += config.getMirrorSwapChance() * 1 / static_cast<double>(config.getRoundLimit());
                 break;
             case spy::gadget::GadgetEnum::POCKET_LITTER:
                 ret += config.getObservationSuccessChance() * numObservation / numCharacter;
@@ -223,7 +230,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
                                                     const spy::scenario::Scenario &scenarioConfig,
                                                     const std::vector<spy::character::CharacterInformation> &characterConfig) {
 
-    std::set<spy::character::PropertyEnum> posProps = {spy::character::PropertyEnum::PONDEROUSNESS};
+    std::set<spy::character::PropertyEnum> posProps = {spy::character::PropertyEnum::SPRYNESS};
     std::set<spy::character::PropertyEnum> negProps;
 
     switch (chosenGadgetType) {
@@ -260,7 +267,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
             negProps.insert(spy::character::PropertyEnum::NIMBLENESS);
             posProps.insert(spy::character::PropertyEnum::SLUGGISHNESS);
             negProps.insert(spy::character::PropertyEnum::AGILITY);
-            posProps.insert(spy::character::PropertyEnum::SPRYNESS);
+            posProps.insert(spy::character::PropertyEnum::PONDEROUSNESS);
             break;
         case spy::gadget::GadgetEnum::GAS_GLOSS:
             break;
@@ -279,7 +286,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
             negProps.insert(spy::character::PropertyEnum::NIMBLENESS);
             posProps.insert(spy::character::PropertyEnum::SLUGGISHNESS);
             negProps.insert(spy::character::PropertyEnum::AGILITY);
-            posProps.insert(spy::character::PropertyEnum::SPRYNESS);
+            posProps.insert(spy::character::PropertyEnum::PONDEROUSNESS);
             break;
         case spy::gadget::GadgetEnum::CHICKEN_FEED:
             posProps.insert(spy::character::PropertyEnum::OBSERVATION);
@@ -336,7 +343,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
                 val -= 1;
             }
         }
-        if (props.find(spy::character::PropertyEnum::SPRYNESS) != props.end()) {
+        if (props.find(spy::character::PropertyEnum::PONDEROUSNESS) != props.end()) {
             val -= 0.5;
         }
         if (props.find(spy::character::PropertyEnum::AGILITY) != props.end()) {
@@ -480,9 +487,9 @@ void evalFunctions_caro::setStaticVars(const spy::scenario::Scenario &scenarioCo
 
     // mixed
     maxChipsInCasion = config.getMaxChipsRoulette() * numRouletteTables;
-    chipsToIpJudge = maxChipsInCasion * (double) config.getChipsToIpFactor() /
-                     ((numSafes + numCharacter - 4) * (double) config.getSecretToIpFactor() +
-                      maxChipsInCasion * (double) config.getChipsToIpFactor());
+    chipsToIpJudge = maxChipsInCasion * static_cast<double>(config.getChipsToIpFactor()) /
+                     ((numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) +
+                      maxChipsInCasion * static_cast<double>(config.getChipsToIpFactor()));
 
     staticVarsSet = true;
 }
