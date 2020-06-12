@@ -83,7 +83,7 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                     // roulette
                 case spy::character::PropertyEnum::LUCKY_DEVIL:
                     ret += numRouletteTables / numFields * (1 - numLuckyDevil / numCharacter) * chipsToIpJudge *
-                           midChipsPerRoulette / maxChipsInCasion;
+                           midChipsPerRoulette / maxChipsInCasino;
                     break;
                 case spy::character::PropertyEnum::JINX:
                     ret -= numRouletteTables / numFields * (1 - numJinx / numCharacter) * chipsToIpJudge *
