@@ -87,7 +87,7 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
                     break;
                 case spy::character::PropertyEnum::JINX:
                     ret -= numRouletteTables / numFields * (1 - numJinx / numCharacter) * chipsToIpJudge *
-                           midChipsPerRoulette / maxChipsInCasion;
+                           midChipsPerRoulette / maxChipsInCasino;
                     break;
                 case spy::character::PropertyEnum::BANG_AND_BURN:
                     if (props.find(spy::character::PropertyEnum::LUCKY_DEVIL) != props.end()) {
