@@ -8,6 +8,7 @@
 #include <datatypes/gameplay/State.hpp>
 #include <utility>
 #include <datatypes/matchconfig/MatchConfig.hpp>
+#include <LibClient.hpp>
 
 namespace spy::gameplay {
     class State_AI : public State {
@@ -29,22 +30,25 @@ namespace spy::gameplay {
             double stateChance = 1;
             std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
-            std::set<spy::gadget::GadgetEnum> collectedGadgets;
-            std::set<spy::gadget::GadgetEnum> grappledGadgets;
-            std::set<spy::gadget::GadgetEnum> usedGadgets;
+            std::vector<spy::gadget::GadgetEnum> collectedGadgets;
+            std::vector<spy::gadget::GadgetEnum> grappledGadgets;
+            std::vector<spy::gadget::GadgetEnum> usedGadgets;
             int chipDiff = 0;
             std::set<spy::util::UUID> removedClammyClothes;
             std::map<spy::util::UUID, int> hpDiff;
+            std::vector<double> observationResult;
 
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
-                                                         const spy::MatchConfig &config) const;
+                                                                       const spy::MatchConfig &config,
+                                                                       const libclient::LibClient &libClient) const;
 
             void addDamage(const spy::character::Character &character, int damage);
 
         private:
             [[nodiscard]] std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,
-                                                     const spy::MatchConfig &config) const;
+                                                                   const spy::MatchConfig &config,
+                                                                   const libclient::LibClient &libClient) const;
     };
 }
 

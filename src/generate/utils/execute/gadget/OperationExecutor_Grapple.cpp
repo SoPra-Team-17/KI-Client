@@ -16,7 +16,7 @@ OperationExecutor::executeGrapple(const spy::gameplay::State_AI &state, const sp
     // successful hit
     auto targetField = sSuccess.getMap().getField(op.getTarget());
     character->addGadget(targetField.getGadget().value());
-    sSuccess.grappledGadgets.insert(targetField.getGadget().value()->getType());
+    sSuccess.grappledGadgets.push_back(targetField.getGadget().value()->getType());
     targetField.removeGadget();
 
     sSuccess.stateChance *= config.getGrappleHitChance();

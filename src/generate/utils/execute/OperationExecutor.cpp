@@ -6,7 +6,7 @@
 
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::execute(const spy::gameplay::State_AI &s, std::shared_ptr<spy::gameplay::BaseOperation> op,
-                           const spy::MatchConfig &config) {
+                           const spy::MatchConfig &config, const libclient::LibClient &libClient) {
     using namespace spy::gameplay;
 
     switch (op->getType()) {
@@ -15,7 +15,7 @@ OperationExecutor::execute(const spy::gameplay::State_AI &s, std::shared_ptr<spy
 
         case OperationEnum::GADGET_ACTION:
             return OperationExecutor::executeGadget(s, *std::dynamic_pointer_cast<const GadgetAction>(op),
-                                                    config);
+                                                    config, libClient);
 
         case OperationEnum::GAMBLE_ACTION:
             return OperationExecutor::executeGamble(s, *std::dynamic_pointer_cast<const GambleAction>(op));
@@ -23,10 +23,10 @@ OperationExecutor::execute(const spy::gameplay::State_AI &s, std::shared_ptr<spy
         case OperationEnum::PROPERTY_ACTION:
             return OperationExecutor::executeProperty(s,
                                                       *std::dynamic_pointer_cast<const PropertyAction>(op),
-                                                      config);
+                                                      config, libClient);
 
         case OperationEnum::SPY_ACTION:
-            return OperationExecutor::executeSpy(s, *std::dynamic_pointer_cast<const SpyAction>(op), config);
+            return OperationExecutor::executeSpy(s, *std::dynamic_pointer_cast<const SpyAction>(op), config, libClient);
 
         case OperationEnum::RETIRE:
             return OperationExecutor::executeRetire(s, *std::dynamic_pointer_cast<const RetireAction>(op));

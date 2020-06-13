@@ -20,7 +20,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         execute(const spy::gameplay::State_AI &s, std::shared_ptr<spy::gameplay::BaseOperation> op,
-                const spy::MatchConfig &config);
+                const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeRetire(const spy::gameplay::State_AI &state, const spy::gameplay::RetireAction &op);
@@ -30,23 +30,23 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executeGadget(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                      const spy::MatchConfig &config);
+                      const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeGamble(const spy::gameplay::State_AI &state, const spy::gameplay::GambleAction &op);
 
         static std::vector<spy::gameplay::State_AI>
         executeProperty(const spy::gameplay::State_AI &state, const spy::gameplay::PropertyAction &op,
-                        const spy::MatchConfig &config);
+                        const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeSpy(const spy::gameplay::State_AI &state, const spy::gameplay::SpyAction &op,
-                   const spy::MatchConfig &config);
+                   const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
     private:
         static std::vector<spy::gameplay::State_AI>
         executeObservation(const spy::gameplay::State_AI &state, const spy::gameplay::PropertyAction &op,
-                           const spy::MatchConfig &config);
+                           const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeBangAndBurn(const spy::gameplay::State_AI &state, const spy::gameplay::PropertyAction &op);

@@ -43,7 +43,7 @@ OperationExecutor::executeMovement(const spy::gameplay::State_AI &state, const s
         // pick up gadget
         character->addGadget(gadget.value());
         s.getMap().getField(op.getTarget()).removeGadget();
-        s.collectedGadgets.insert(gadget.value()->getType());
+        s.collectedGadgets.push_back(gadget.value()->getType());
     }
 
     return {s};

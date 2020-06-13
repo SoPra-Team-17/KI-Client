@@ -6,10 +6,10 @@
 
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                                 const spy::MatchConfig &config) {
+                                 const spy::MatchConfig &config, const libclient::LibClient &libClient) {
     spy::gameplay::State_AI s = state;
     s.operationsLeadingToState.push_back(std::make_shared<spy::gameplay::GadgetAction>(op));
-    s.usedGadgets.insert(op.getGadget());
+    s.usedGadgets.push_back(op.getGadget());
 
     auto character = s.getCharacters().getByUUID(op.getCharacterId());
     character->subActionPoint();

@@ -8,9 +8,9 @@
 
 std::shared_ptr<spy::gameplay::BaseOperation>
 GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay::State &s,
-                        const spy::MatchConfig &config) {
+                        const spy::MatchConfig &config, const libclient::LibClient &libClient) {
     spy::gameplay::State_AI state {s};
-    auto endStates = state.getLeafSuccessorStates(characterId, config);
+    auto endStates = state.getLeafSuccessorStates(characterId, config, libClient);
 
     std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute;
     double endVal = -std::numeric_limits<double>::infinity();
