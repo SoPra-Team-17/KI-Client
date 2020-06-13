@@ -9,6 +9,7 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
                                  const spy::MatchConfig &config) {
     spy::gameplay::State_AI s = state;
     s.operationsLeadingToState.push_back(std::make_shared<spy::gameplay::GadgetAction>(op));
+    s.usedGadgets.insert(op.getGadget());
 
     auto character = s.getCharacters().getByUUID(op.getCharacterId());
     character->subActionPoint();

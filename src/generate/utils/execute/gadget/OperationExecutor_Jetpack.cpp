@@ -6,7 +6,11 @@
 
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeJetpack(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op) {
-    // TODO execute
+    spy::gameplay::State_AI s = state;
 
-    return {};
+    auto character = s.getCharacters().getByUUID(op.getCharacterId());
+    character->setCoordinates(op.getTarget());
+    character->removeGadget(op.getGadget());
+
+    return {s};
 }

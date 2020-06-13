@@ -6,7 +6,14 @@
 
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeDiamondCollar(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op) {
-    // TODO execute
+    spy::gameplay::State_AI s = state;
+    s.isLeafState = true;
 
-    return {};
+    auto character = s.getCharacters().getByUUID(op.getCharacterId());
+    s.getFactionStats().collarToCat = character->getFaction();
+    s.setHasCatDiamondCollar(true);
+
+    character->removeGadget(spy::gadget::GadgetEnum::DIAMOND_COLLAR);
+
+    return {s};
 }

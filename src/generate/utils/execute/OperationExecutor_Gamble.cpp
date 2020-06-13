@@ -2,6 +2,7 @@
 // Created by Carolin on 13.06.2020.
 //
 
+#include <util/GameLogicUtils.hpp>
 #include "OperationExecutor.hpp"
 
 std::vector<spy::gameplay::State_AI>
@@ -15,7 +16,32 @@ OperationExecutor::executeGamble(const spy::gameplay::State_AI &state, const spy
         s.isLeafState = true;
     }
 
-    // TODO execute
+    auto targetField = s.getMap().getField(op.getTarget());
 
-    return {s};
+    double winningChance = 18.0/37.0;
+    if (character->hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
+        winningChance = 32.0/37.0;
+    } else if (character->hasProperty(spy::character::PropertyEnum::JINX)) {
+        winningChance = 13.0/37.0;
+    }
+    winningChance = targetField.isInverted() ? (1-winningChance) : winningChance;
+
+    spy::gameplay::State_AI sWon = s;
+    spy::gameplay::State_AI sLost = s;
+
+
+    // won in roulette
+    character->setChips(character->getChips() + op.getStake());
+    sWon.chipDiff += static_cast<int>(op.getStake());
+    targetField.setChipAmount(targetField.getChipAmount().value() - op.getStake());
+
+    // lost in roulette
+    character->setChips(character->getChips() - op.getStake());
+    sLost.chipDiff -= static_cast<int>(op.getStake());
+    targetField.setChipAmount(targetField.getChipAmount().value() + op.getStake());
+
+    sWon.stateChance *= winningChance;
+    sLost.stateChance *= (1 - winningChance);
+
+    return {sWon, sLost};
 }

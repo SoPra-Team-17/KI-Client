@@ -48,4 +48,20 @@ namespace spy::gameplay {
 
         return leafSuccessors;
     }
+
+    void State_AI::addDamage(const spy::character::Character &character, int damage) {
+        if (character.hasProperty(character::PropertyEnum::TOUGHNESS)) {
+            damage /= 2;
+        }
+
+        auto id = character.getCharacterId();
+        if (hpDiff.find(id) == hpDiff.end()) {
+            // entry does not exist
+            hpDiff[id] = damage;
+        } else {
+            // entry already exists
+            hpDiff[id] += damage;
+        }
+
+    }
 }

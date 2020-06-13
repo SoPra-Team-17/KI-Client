@@ -6,7 +6,9 @@
 
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeBangAndBurn(const spy::gameplay::State_AI &state, const spy::gameplay::PropertyAction &op) {
-    // TODO execute
+    spy::gameplay::State_AI s = state;
 
-    return {};
+    s.getMap().getField(op.getTarget()).setDestroyed(true);
+
+    return {s};
 }

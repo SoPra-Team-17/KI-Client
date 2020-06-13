@@ -30,10 +30,17 @@ namespace spy::gameplay {
             std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
             std::set<spy::gadget::GadgetEnum> collectedGadgets;
+            std::set<spy::gadget::GadgetEnum> grappledGadgets;
+            std::set<spy::gadget::GadgetEnum> usedGadgets;
+            int chipDiff = 0;
+            std::set<spy::util::UUID> removedClammyClothes;
+            std::map<spy::util::UUID, int> hpDiff;
 
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                          const spy::MatchConfig &config) const;
+
+            void addDamage(const spy::character::Character &character, int damage);
 
         private:
             [[nodiscard]] std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,

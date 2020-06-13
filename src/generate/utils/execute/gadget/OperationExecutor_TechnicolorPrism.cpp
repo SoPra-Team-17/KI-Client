@@ -6,7 +6,14 @@
 
 std::vector<spy::gameplay::State_AI> OperationExecutor::executeTechnicolorPrism(const spy::gameplay::State_AI &state,
                                                                                 const spy::gameplay::GadgetAction &op) {
-    // TODO execute
+    spy::gameplay::State_AI s = state;
 
-    return {};
+    // invert roulette table
+    s.getMap().getField(op.getTarget()).setInverted(true);
+
+    // remove technicolor prism from inventory
+    auto character = s.getCharacters().getByUUID(op.getCharacterId());
+    character->removeGadget(spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM);
+
+    return {s};
 }
