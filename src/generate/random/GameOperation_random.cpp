@@ -3,9 +3,8 @@
 //
 
 #include "../GameOperation_gen.hpp"
-#include <gameLogic/generation/ActionGenerator.hpp>
 
-std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+std::shared_ptr<spy::gameplay::BaseOperation>
 GameOperation_gen::random(const spy::util::UUID &characterId, const spy::gameplay::State &s,
                           const spy::MatchConfig &config) {
     return {spy::gameplay::ActionGenerator::generateRandomAction(s, characterId, config)};

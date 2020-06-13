@@ -25,10 +25,12 @@ namespace spy::gameplay {
 
             explicit State_AI(const State &s) : State(s) {};
 
+            // TODO: (evaluation) variables: have to be set by execute methods
             double stateChance = 1;
             std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
-            // TODO: add evaluation variables here (have to be set by execute)
+            std::set<spy::gadget::GadgetEnum> collectedGadgets;
+
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                          const spy::MatchConfig &config) const;

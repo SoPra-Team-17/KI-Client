@@ -3,7 +3,6 @@
 //
 
 #include "../EquipmentChoice_gen.hpp"
-#include <gameLogic/generation/EquipmentChoiceGenerator.hpp>
 
 std::map<spy::util::UUID, std::set<spy::gadget::GadgetEnum>>
 EquipmentChoice_gen::random(const std::vector<spy::util::UUID> &chosenCharacterIds,

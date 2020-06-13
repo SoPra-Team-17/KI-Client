@@ -360,9 +360,13 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
     return retChar;
 }
 
-double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &/*s*/, const spy::util::UUID &/*characterId*/) {
-    // TODO implement
-    return -std::numeric_limits<double>::infinity();
+double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &/*characterId*/) {
+    double retVal = -std::numeric_limits<double>::infinity();
+    // TODO implement: hp, ip, chips (to ip), diamond collar, nearness (npc, safe, cat, janitor, roulette, cocktail (poisoned), seat)
+    // TODO implement: collecting gadgets, using gadgets
+    // TODO implement: rate worse actions with -std::numeric_limits<double>::infinity()
+    // TODO implement: use * or + ?
+    return retVal * s.stateChance;
 }
 
 void evalFunctions_caro::setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,

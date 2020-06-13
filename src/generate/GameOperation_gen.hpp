@@ -13,15 +13,15 @@ class GameOperation_gen {
     public:
         GameOperation_gen() = delete;
 
-        static std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+        static std::shared_ptr<spy::gameplay::BaseOperation>
         generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
                  const spy::MatchConfig &config);
 
     private:
-        static std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+        static std::shared_ptr<spy::gameplay::BaseOperation>
         random(const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config);
 
-        static std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+        static std::shared_ptr<spy::gameplay::BaseOperation>
         caro(const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config);
 };
 

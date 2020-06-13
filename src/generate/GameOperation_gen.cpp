@@ -4,7 +4,7 @@
 
 #include "GameOperation_gen.hpp"
 
-std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> GameOperation_gen::generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
+std::shared_ptr<spy::gameplay::BaseOperation> GameOperation_gen::generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
                                                                           const spy::MatchConfig &config) {
     switch (difficulty) {
         case 1:

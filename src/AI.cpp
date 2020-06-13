@@ -7,7 +7,6 @@
 #include <generate/ItemChoice_gen.hpp>
 #include <generate/EquipmentChoice_gen.hpp>
 #include <generate/GameOperation_gen.hpp>
-#include <utility>
 #include <random>
 #include "util/Logging.hpp"
 
@@ -114,10 +113,8 @@ void AI::onRequestGameOperation() {
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    if (nextOperations.empty()) {
-        nextOperations = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
+    auto nextOperation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
                                                      libClientHandler.getState(), matchConfig.value());
-    }
     auto stop = std::chrono::high_resolution_clock::now();
     auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
@@ -131,10 +128,9 @@ void AI::onRequestGameOperation() {
         spdlog::warn("took too long to calculate");
     }
 
-    if (!libClientHandler.network.sendGameOperation(nextOperations[0], matchConfig.value())) {
+    if (!libClientHandler.network.sendGameOperation(nextOperation, matchConfig.value())) {
         throw std::runtime_error{"could not send GameOperation message"};
     }
-    nextOperations.erase(nextOperations.begin());
     spdlog::info("sent GameOperation message");
 }
 
