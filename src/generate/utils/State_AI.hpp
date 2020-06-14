@@ -26,7 +26,6 @@ namespace spy::gameplay {
 
             explicit State_AI(const State &s) : State(s) {};
 
-            // TODO: (evaluation) variables: have to be set by execute methods
             bool wasHoneyTrapUsed = false; // reset to false for each new operation execution
             double stateChance = 1;
             std::vector<std::shared_ptr<BaseOperation>> operationsLeadingToState;
@@ -38,8 +37,8 @@ namespace spy::gameplay {
             std::set<spy::util::UUID> addedClammyClothes;
             std::map<spy::util::UUID, int> hpDiff;
             std::vector<std::optional<double>> observationResult; // if nullopt modify this value (no info about pocket litter)
-            double nuggetResult;
-            std::pair<double, std::optional<spy::util::UUID>> chickenfeedResult;
+            std::optional<double> nuggetResult; // if nullopt modify this value (no info about faction)
+            std::pair<std::optional<double>, std::optional<spy::util::UUID>> chickenfeedResult; // if nullopt modify this value (no info about faction)
             std::pair<int, std::optional<spy::util::UUID>> mowResult;
             int unknownGadgetsModifyingSuccess; // for each gadget modify stateChance
             std::vector<std::pair<std::variant<spy::util::UUID, spy::util::Point>, bool>> removedCocktails;
@@ -48,6 +47,9 @@ namespace spy::gameplay {
             spy::util::Point invertedRoulette;
             std::vector<spy::util::Point> foggyFields;
             std::vector<spy::util::Point> destroyedWalls;
+            std::vector<std::pair<spy::util::UUID, std::optional<double>>> spyResult; // if nullopt modify this value (no info about faction)
+            std::vector<spy::util::Point> spyedSafes;
+            spy::util::UUID movedMoledieTo;
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                                        const spy::MatchConfig &config,

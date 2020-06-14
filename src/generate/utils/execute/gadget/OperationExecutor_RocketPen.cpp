@@ -8,6 +8,10 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeRocketPen(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                     const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+    if (config.getRocketPenDamage() == 0) {
+        return {};
+    }
+
     std::vector<spy::gameplay::State_AI> honeyStates;
     spy::gameplay::State_AI myState = state;
 

@@ -8,6 +8,9 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeMothballPouch(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                         const spy::MatchConfig &config) {
+    if (config.getMothballPouchDamage() == 0) {
+        return {};
+    }
     spy::gameplay::State_AI s = state;
 
     // get persons neighboring the fireplace

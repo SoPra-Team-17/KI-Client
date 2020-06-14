@@ -27,7 +27,7 @@ OperationExecutor::executeNugget(const spy::gameplay::State_AI &state, const spy
             return {};
         }
     } else {
-        s.nuggetResult = 0.5;
+        s.nuggetResult = std::nullopt;
     }
 
     return {s};

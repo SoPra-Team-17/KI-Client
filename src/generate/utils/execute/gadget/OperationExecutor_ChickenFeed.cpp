@@ -25,7 +25,7 @@ OperationExecutor::executeChickenFeed(const spy::gameplay::State_AI &state, cons
             s.chickenfeedResult.first = isTargetEnemy.value();
         }
     } else {
-        s.chickenfeedResult.first = 0.5;
+        s.chickenfeedResult.first = std::nullopt;
     }
     // TODO (optional): ipDiff but ip are currently not tracked by libClient object
 

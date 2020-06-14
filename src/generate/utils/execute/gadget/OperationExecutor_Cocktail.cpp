@@ -19,6 +19,11 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
 
     if (targetField.getFieldState() == spy::scenario::FieldStateEnum::BAR_TABLE) {
         // take the cocktail from the bar table
+        auto cocktail = std::dynamic_pointer_cast<spy::gadget::Cocktail>(
+                std::dynamic_pointer_cast<spy::gadget::Cocktail>(targetField.getGadget().value()));
+        if (cocktail->isPoisoned()) {
+            return {};
+        }
         sourceChar->addGadget(targetField.getGadget().value());
         targetField.removeGadget();
         sSuccess.collectedGadgets.push_back(op.getGadget());
@@ -28,20 +33,19 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
 
         if (drink) {
             auto configHP = config.getCocktailHealthPoints();
+            if (configHP == 0) {
+                return {};
+            }
             // check if cocktail is poisoned
             auto cocktail = std::dynamic_pointer_cast<spy::gadget::Cocktail>(
                     sourceChar->getGadget(spy::gadget::GadgetEnum::COCKTAIL).value());
-            if (!cocktail->isPoisoned()) {
+            if (cocktail->isPoisoned()) {
+                return {};
+            } else {
                 auto cocktailHP = sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH) ? 2 * configHP
                                                                                                         : configHP;
                 sourceChar->addHealthPoints(cocktailHP);
                 sSuccess.addDamage(*sourceChar, -cocktailHP); // negative damage -> add hp
-            } else {
-                // cocktail is poisoned
-                auto cocktailDamage = sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH) ? 0.5 * configHP
-                                                                                                            : configHP;
-                sourceChar->subHealthPoints(cocktailDamage);
-                sSuccess.addDamage(*sourceChar, cocktailDamage);
             }
         } else { // pour the cocktail over another character
             // honey trap
@@ -51,11 +55,8 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
                 return honeyStates;
             }
 
-            if (config.getCocktailDodgeChance() == 1) {
-                return {};
-            }
-            sSuccess.modStateChance(*sourceChar, 1 - config.getCocktailDodgeChance());
             auto targetChar = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(sSuccess.getCharacters(), op.getTarget());
+            sSuccess.modStateChance(*targetChar, 1 - config.getCocktailDodgeChance());
             if (targetChar->hasProperty(spy::character::PropertyEnum::CONSTANT_CLAMMY_CLOTHES) ||
                 targetChar->hasProperty(spy::character::PropertyEnum::CLAMMY_CLOTHES)) {
                 return {}; // action does not change anything

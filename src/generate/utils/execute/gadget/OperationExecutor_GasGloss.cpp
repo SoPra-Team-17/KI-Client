@@ -8,6 +8,10 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeGasGloss(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                    const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+    if (config.getGasGlossDamage() == 0) {
+        return {};
+    }
+
     std::vector<spy::gameplay::State_AI> honeyStates;
     spy::gameplay::State_AI myState = state;
 

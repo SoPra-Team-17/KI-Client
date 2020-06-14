@@ -16,6 +16,9 @@ std::vector<spy::gameplay::State_AI> OperationExecutor::executeMirrorOfWildernes
 
     bool sameFaction = (sourceChar->getFaction() == targetChar->getFaction());
     if (!sameFaction) {
+        if (config.getMirrorSwapChance() == 0) {
+            return {};
+        }
         sSuccess.modStateChance(*sourceChar, config.getMirrorSwapChance());
     }
 
@@ -44,7 +47,7 @@ std::vector<spy::gameplay::State_AI> OperationExecutor::executeMirrorOfWildernes
             sSuccess.mowResult.second = character.value()->getCharacterId();
         }
     }
-    
+
 
     if (!sameFaction) {
         sourceChar->removeGadget(spy::gadget::GadgetEnum::MIRROR_OF_WILDERNESS);

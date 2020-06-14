@@ -30,6 +30,7 @@ OperationExecutor::executeMoleDie(const spy::gameplay::State_AI &state, const sp
         // mole die goes into the person inventory
         auto targetPerson = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(my.getCharacters(), op.getTarget());
         targetPerson->addGadget(std::make_shared<spy::gadget::Gadget>(spy::gadget::GadgetEnum::MOLEDIE));
+        my.movedMoledieTo = targetPerson->getCharacterId();
 
         honeyStates.push_back(my);
         return honeyStates;
@@ -42,6 +43,7 @@ OperationExecutor::executeMoleDie(const spy::gameplay::State_AI &state, const sp
         buf.stateChance *= 1 / closestPoints.size();
         auto closestPerson = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(buf.getCharacters(), p);
         closestPerson->addGadget(std::make_shared<spy::gadget::Gadget>(spy::gadget::GadgetEnum::MOLEDIE));
+        buf.movedMoledieTo = closestPerson->getCharacterId();
         myStates.push_back(buf);
     }
 

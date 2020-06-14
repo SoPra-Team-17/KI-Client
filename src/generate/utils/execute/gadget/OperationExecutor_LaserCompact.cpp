@@ -9,17 +9,16 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeLaserCompact(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                        const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+    if (config.getLaserCompactHitChance() == 0) {
+        return {};
+    }
 
     std::vector<spy::gameplay::State_AI> honeyStates;
     spy::gameplay::State_AI myState = state;
 
     auto character = myState.getCharacters().getByUUID(op.getCharacterId());
 
-    if (config.getLaserCompactHitChance() == 0) {
-        return {};
-    } else {
-        myState.modStateChance(*character, config.getBowlerBladeHitChance());
-    }
+    myState.modStateChance(*character, config.getBowlerBladeHitChance());
 
     // honey trap
     auto honeyTrapResult = myState.handleHoneyTrap(op, config, libClient);

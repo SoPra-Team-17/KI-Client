@@ -8,6 +8,9 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                       const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+    if (config.getBowlerBladeHitChance() == 0 || config.getBowlerBladeDamage() == 0) {
+        return {};
+    }
 
     std::vector<spy::gameplay::State_AI> honeyStates;
     std::vector<spy::gameplay::State_AI> myStates;
@@ -16,11 +19,8 @@ OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, cons
     auto character = sSuccess.getCharacters().getByUUID(op.getCharacterId());
     character->removeGadget(op.getGadget());
 
-    if (config.getBowlerBladeHitChance() == 0) {
-        return {};
-    } else {
-        sSuccess.modStateChance(*character, config.getBowlerBladeHitChance());
-    }
+    sSuccess.modStateChance(*character, config.getBowlerBladeHitChance());
+
 
     // honey trap and babysitter
     auto honeyTrapResult = sSuccess.handleHoneyTrap(op, config, libClient);
