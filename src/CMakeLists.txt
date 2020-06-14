@@ -61,4 +61,20 @@ target_include_directories(${PROJECT_NAME}
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 
-target_link_libraries(${PROJECT_NAME} ${LIBS})
+add_library(SopraAI SHARED ${SOURCE})
+target_compile_options(SopraAI PRIVATE ${COMMON_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror -mtune=native -march=native)
+target_link_libraries(SopraAI
+        SopraCommon
+        SopraClient
+        $<$<CONFIG:Debug>:--coverage>)
+target_include_directories(SopraAI
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+target_compile_features(SopraAI PRIVATE cxx_std_17)
+
+include(GNUInstallDirs)
+install(TARGETS SopraAI DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/generate"
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/SopraAI
+        FILES_MATCHING PATTERN "*.hpp"
+        )
