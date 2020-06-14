@@ -33,6 +33,13 @@ Test the installation by executing the AI-Client.
 ```
 ./src/ki017 -h
 ```
+### Installing the API
+The AI-Client provides an interface to the Choice and Operation generation methods via a library (SopraAI).
+To install the library execute the following command after compiling the application:
+```
+sudo make install
+```
+The library can be linked with `-lSopraAI`.
 
 ### Docker
 ### Building the docker container
