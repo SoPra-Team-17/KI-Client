@@ -11,11 +11,14 @@ OperationExecutor::executeRocketPen(const spy::gameplay::State_AI &state, const 
     std::vector<spy::gameplay::State_AI> honeyStates;
     spy::gameplay::State_AI myState = state;
 
-    // honey trap
+    // honey trap and babysitter
     auto honeyTrapResult = myState.handleHoneyTrap(op, config, libClient);
     honeyStates = honeyTrapResult.first;
     if (honeyTrapResult.second) {
         return honeyStates;
+    }
+    if (myState.handleBabysitter(op, config)) {
+        return {};
     }
 
     // destroy potential wall on target field
@@ -44,8 +47,6 @@ OperationExecutor::executeRocketPen(const spy::gameplay::State_AI &state, const 
     // damage on targetfield, if there is a person
     bool targetHasPerson = spy::util::GameLogicUtils::isPersonOnField(myState, op.getTarget());
     if (targetHasPerson) {
-        // babysitter and damage
-        myState.handleBabysitter(op, config);
         auto person = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(myState.getCharacters(), op.getTarget());
         spy::util::GameLogicUtils::applyDamageToCharacter(myState, *person, damage);
         myState.addDamage(*person, damage);

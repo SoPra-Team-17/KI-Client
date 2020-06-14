@@ -37,7 +37,7 @@ OperationExecutor::executeLaserCompact(const spy::gameplay::State_AI &state, con
         targetPerson->removeGadget(op.getGadget());
     } else {
         // remove cocktail from field
-        auto field = myState.getMap().getField(op.getTarget());
+        auto &field = myState.getMap().getField(op.getTarget());
         bool poisoned = std::dynamic_pointer_cast<spy::gadget::Cocktail>(field.getGadget().value())->isPoisoned();
         myState.removedCocktails.push_back({op.getTarget(), poisoned});
         field.removeGadget();

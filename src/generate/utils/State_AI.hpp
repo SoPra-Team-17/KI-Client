@@ -32,13 +32,15 @@ namespace spy::gameplay {
             std::vector<std::shared_ptr<BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
             std::vector<spy::gadget::GadgetEnum> collectedGadgets;
-            std::vector<spy::gadget::GadgetEnum> grappledGadgets;
             std::vector<spy::gadget::GadgetEnum> usedGadgets;
             int chipDiff = 0;
             std::set<spy::util::UUID> removedClammyClothes;
+            std::set<spy::util::UUID> addedClammyClothes;
             std::map<spy::util::UUID, int> hpDiff;
             std::vector<std::optional<double>> observationResult; // if nullopt modify this value (no info about pocket litter)
             double nuggetResult;
+            std::pair<double, std::optional<spy::util::UUID>> chickenfeedResult;
+            std::pair<int, std::optional<spy::util::UUID>> mowResult;
             int unknownGadgetsModifyingSuccess; // for each gadget modify stateChance
             std::vector<std::pair<std::variant<spy::util::UUID, spy::util::Point>, bool>> removedCocktails;
             std::vector<std::variant<spy::util::UUID, spy::util::Point>> poisonedCocktails;

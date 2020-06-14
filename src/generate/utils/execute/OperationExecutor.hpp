@@ -80,7 +80,8 @@ class OperationExecutor {
                             const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
-        executeChickenFeed(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op);
+        executeChickenFeed(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
+                           const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeMirrorOfWilderness(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
@@ -114,7 +115,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executeCocktail(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                        const spy::MatchConfig &config);
+                        const spy::MatchConfig &config, const libclient::LibClient &libClient);
 };
 
 

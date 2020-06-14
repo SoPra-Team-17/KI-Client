@@ -48,13 +48,13 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
         case GadgetEnum::JETPACK:
             return executeJetpack(s, op);
         case GadgetEnum::CHICKEN_FEED:
-            return executeChickenFeed(s, op);
+            return executeChickenFeed(s, op, libClient);
         case GadgetEnum::NUGGET:
             return executeNugget(s, op, libClient);
         case GadgetEnum::MIRROR_OF_WILDERNESS:
             return executeMirrorOfWilderness(s, op, config);
         case GadgetEnum::COCKTAIL:
-            return executeCocktail(s, op, config);
+            return executeCocktail(s, op, config, libClient);
         default:
             return {};
     }
