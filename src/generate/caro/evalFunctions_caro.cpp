@@ -433,7 +433,7 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
     // movement
     spy::util::Point endPoint = s.getCharacters().findByUUID(characterId)->getCoordinates().value();
     if (endPoint != s.startPoint) {
-        // TODO: nearness (npc, safe, cat, janitor, roulette, cocktail (not poisoned), seat)
+        // TODO: nearness (npc, safe, cat, janitor, roulette, cocktail (not poisoned), seat, chimney)
     }
 
     // gadget
@@ -647,7 +647,33 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
     }
 
     // spy
-    // TODO std::vector<std::pair<spy::util::UUID, std::optional<double>>> spyResult; std::vector<spy::util::Point> spyedSafes;
+    const auto& getCombisFromNpcs = libClient.getCombinationsFromNpcs();
+    for (const auto &pair: s.spyResult) {
+        if (pair.second.value() <= 0.5) {
+            return -std::numeric_limits<double>::infinity(); // to unsure to spy out
+        } else {
+            if (getCombisFromNpcs.find(pair.first) != getCombisFromNpcs.end()) {
+                retVal += (pair.second.value() - 0.5) * 0.5;
+            } else {
+                retVal += pair.second.value() - 0.5;
+            }
+        }
+    }
+    const auto& openedSafes = libClient.getOpenedSafes();
+    const auto& triedSafes = libClient.getTriedSafes();
+    const auto& safeCombis = libClient.getSafeCombinations();
+    for (const auto &p: s.spyedSafes) {
+        auto safeIndex= libClient.safePosToIndex(s, p);
+        if (openedSafes.find(safeIndex) != openedSafes.end()) {
+            return -std::numeric_limits<double>::infinity(); // do not open already opened safes
+        }
+        if (triedSafes.find(safeIndex) != triedSafes.end()) {
+            if (triedSafes.at(safeIndex) == static_cast<int>(safeCombis.size())) {
+                return -std::numeric_limits<double>::infinity(); // do not reopen already tried safes without new combis
+            }
+        }
+        retVal += config.getSecretToIpFactor() / (numSafes - static_cast<double>(openedSafes.size()));
+    }
 
     return retVal * s.stateChance;
 }

@@ -33,10 +33,10 @@ OperationExecutor::executeSpy(const spy::gameplay::State_AI &state, const spy::g
             if (isTargetNpc.value() == 0) {
                 return {};
             } else {
-                s.spyResult.push_back({targetChar->getCharacterId(), isTargetNpc.value()});
+                s.spyResult.emplace_back(targetChar->getCharacterId(), isTargetNpc.value());
             }
         } else {
-            s.spyResult.push_back({targetChar->getCharacterId(), std::nullopt});
+            s.spyResult.emplace_back(targetChar->getCharacterId(), std::nullopt);
         }
     } else {
         // spy on safe
