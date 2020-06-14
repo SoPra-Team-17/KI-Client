@@ -42,8 +42,8 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
             if (cocktail->isPoisoned()) {
                 return {};
             } else {
-                auto cocktailHP = sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH) ? 2 * configHP
-                                                                                                        : configHP;
+                int cocktailHP = static_cast<int>(sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH) ? 2 * configHP
+                                                                                                        : configHP);
                 sourceChar->addHealthPoints(cocktailHP);
                 sSuccess.addDamage(*sourceChar, -cocktailHP); // negative damage -> add hp
             }
