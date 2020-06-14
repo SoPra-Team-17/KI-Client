@@ -9,9 +9,14 @@ std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeGrapple(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                   const spy::MatchConfig &config) {
     spy::gameplay::State_AI sSuccess = state;
-    spy::gameplay::State_AI sFailure = state;
 
     auto character = sSuccess.getCharacters().getByUUID(op.getCharacterId());
+
+    if (config.getGrappleHitChance() == 0) {
+        return {};
+    } else {
+        sSuccess.modStateChance(*character, config.getGrappleHitChance());
+    }
 
     // successful hit
     auto targetField = sSuccess.getMap().getField(op.getTarget());
@@ -19,8 +24,5 @@ OperationExecutor::executeGrapple(const spy::gameplay::State_AI &state, const sp
     sSuccess.grappledGadgets.push_back(targetField.getGadget().value()->getType());
     targetField.removeGadget();
 
-    sSuccess.stateChance *= config.getGrappleHitChance();
-    sFailure.stateChance *= (1 - config.getGrappleHitChance());
-
-    return {sSuccess, sFailure};
+    return {sSuccess};
 }

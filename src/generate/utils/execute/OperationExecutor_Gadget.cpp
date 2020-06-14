@@ -26,7 +26,7 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
         case GadgetEnum::TECHNICOLOUR_PRISM:
             return executeTechnicolorPrism(s, op);
         case GadgetEnum::BOWLER_BLADE:
-            return executeBowlerBlade(s, op, config);
+            return executeBowlerBlade(s, op, config, libClient);
         case GadgetEnum::POISON_PILLS:
             return executePoisonPills(s, op, config);
         case GadgetEnum::LASER_COMPACT:

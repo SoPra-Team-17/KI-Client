@@ -9,15 +9,16 @@ std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeObservation(const spy::gameplay::State_AI &state, const spy::gameplay::PropertyAction &op,
                                       const spy::MatchConfig &config, const libclient::LibClient &libClient) {
     spy::gameplay::State_AI sSuccess = state;
-    spy::gameplay::State_AI sFailure = state;
 
     auto sourceChar = state.getCharacters().findByUUID(op.getCharacterId());
     auto targetChar = spy::util::GameLogicUtils::findInCharacterSetByCoordinates(state.getCharacters(), op.getTarget());
 
     if (sourceChar->getFaction() == targetChar->getFaction() ||
         libClient.getUnknownFactionList().find(targetChar->getCharacterId()) ==
-        libClient.getUnknownFactionList().end()) {
+        libClient.getUnknownFactionList().end() || config.getObservationSuccessChance() == 0) {
         return {}; // action is not useful (no new information will be gained) -> do not continue branch
+    } else {
+        sSuccess.modStateChance(*sourceChar, config.getObservationSuccessChance());
     }
 
     auto targetHasPocketLitter = libClient.hasCharacterGadget(targetChar->getCharacterId(),
@@ -28,11 +29,8 @@ OperationExecutor::executeObservation(const spy::gameplay::State_AI &state, cons
         }
         sSuccess.observationResult.push_back(1 - targetHasPocketLitter.value());
     } else {
-        return {}; // action is not useful (no new information will be gained) -> do not continue branch
+        sSuccess.observationResult.push_back(std::nullopt);
     }
 
-    sSuccess.stateChance *= config.getObservationSuccessChance();
-    sFailure.stateChance *= (1 - config.getObservationSuccessChance());
-
-    return {sSuccess, sFailure};
+    return {sSuccess};
 }

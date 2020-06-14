@@ -73,7 +73,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executeBowlerBlade(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                           const spy::MatchConfig &config);
+                           const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeLaserCompact(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
