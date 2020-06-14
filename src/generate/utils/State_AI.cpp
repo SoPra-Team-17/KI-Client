@@ -97,7 +97,8 @@ namespace spy::gameplay {
         auto targetChar = util::GameLogicUtils::findInCharacterSetByCoordinates(this->getCharacters(),
                                                                                 op.getTarget());
 
-        if (!this->wasHoneyTrapUsed && config.getHoneyTrapSuccessChance() != 0 && targetChar != this->getCharacters().end()) {
+        if (!this->wasHoneyTrapUsed && config.getHoneyTrapSuccessChance() != 0 &&
+            targetChar != this->getCharacters().end()) {
             if (targetChar->hasProperty(spy::character::PropertyEnum::HONEY_TRAP)) {
                 auto otherOps = this->getHoneyTrapAlternatives(op, config);
                 if (!otherOps.empty()) {
@@ -106,7 +107,8 @@ namespace spy::gameplay {
                     // copy and modify state
                     State_AI s = *this;
                     s.wasHoneyTrapUsed = true;
-                    s.modStateChance(*sourceChar, config.getHoneyTrapSuccessChance() / otherOps.size());
+                    s.modStateChance(*sourceChar,
+                                     config.getHoneyTrapSuccessChance() / static_cast<double>(otherOps.size()));
 
                     // reset stuff from executeGadget base method
                     s.operationsLeadingToState.pop_back();
