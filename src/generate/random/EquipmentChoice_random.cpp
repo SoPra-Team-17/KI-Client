@@ -3,7 +3,6 @@
 //
 
 #include "../EquipmentChoice_gen.hpp"
-#include <gameLogic/generation/EquipmentChoiceGenerator.hpp>
 #include <random>
 #include <util/GameLogicUtils.hpp>
 

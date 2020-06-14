@@ -3,7 +3,6 @@
 //
 
 #include "../ItemChoice_gen.hpp"
-#include <gameLogic/generation/ItemChoiceGenerator.hpp>
 #include <util/GameLogicUtils.hpp>
 
 std::variant<spy::util::UUID, spy::gadget::GadgetEnum>
