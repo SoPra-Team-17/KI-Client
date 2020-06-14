@@ -14,7 +14,7 @@ class OperationGenerator {
     public:
         OperationGenerator() = delete;
 
-        static auto generate(const spy::gameplay::State_AI &s, const spy::util::UUID &characterId,
+        static auto generate(const spy::gameplay::State &s, const spy::util::UUID &characterId,
                              const spy::MatchConfig &config) -> std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>;
 };
 
