@@ -29,7 +29,9 @@ std::vector<spy::gameplay::State_AI> OperationExecutor::executeMirrorOfWildernes
     targetChar->setIntelligencePoints(sourceCharIP);
 
     int ipDiff = static_cast<int>(sourceChar->getIntelligencePoints() - targetChar->getIntelligencePoints());
-    sSuccess.mowResult.first = ipDiff;
+    if (sameFaction && sourceChar->hasGadget(spy::gadget::GadgetEnum::CHICKEN_FEED)) {
+        sSuccess.mowResult.first = ipDiff;
+    }
 
     // check and apply wiretap with earplugs gadget
     if (ipDiff > 0) {

@@ -3,6 +3,7 @@
 //
 
 #include "evalFunctions_caro.hpp"
+#include <util/GameLogicUtils.hpp>
 
 bool evalFunctions_caro::staticVarsSet = false;
 
@@ -368,15 +369,14 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
     double retVal = 0;
 
     // modify nullopts in state
-    auto numMyChar = libClient.getMyFactionList().size();
-    auto numEnemyChar = libClient.getEnemyFactionList().size();
-    auto numNpcChar = libClient.getNpcFactionList().size();
-    auto numKnownChar = numMyChar + numEnemyChar + numNpcChar;
-    auto numUnknownChar = libClient.getUnknownFactionList().size();
-
+    double numMyChar = libClient.getMyFactionList().size();
+    double numEnemyChar = libClient.getEnemyFactionList().size();
+    double numUnknownChar = libClient.getUnknownFactionList().size();
     double gadgetNullopt = 1 / (numCharacter - numMyChar);
-    double npcNullopt; //TODO
-    double enemyNullopt; //TODO
+    double enemyNullopt = std::min(1.0, (std::max(0.0, 4 - numEnemyChar) + std::max(0.0, 3 - numEnemyChar) +
+                                         std::max(0.0, 2 - numEnemyChar)) / (3 * numUnknownChar));
+    double npcNullopt = 1 - enemyNullopt;
+
     for (auto &val: s.observationResult) {
         if (!val.has_value()) {
             val = gadgetNullopt;
@@ -411,8 +411,8 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
     }
 
     // health points
-    int myHp = 0;
-    int enemyHp = 0;
+    double myHp = 0;
+    double enemyHp = 0;
     for (const auto &pair: s.hpDiff) {
         if (libClient.hasCharacterFaction(pair.first, spy::character::FactionEnum::PLAYER1).value() == 1) {
             myHp += pair.second;
@@ -436,13 +436,13 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
         // TODO: nearness (npc, safe, cat, janitor, roulette, cocktail (not poisoned), seat)
     }
 
-    // gadget TODO not always +1
+    // gadget
     for (auto &usedG: s.usedGadgets) {
         switch (usedG) {
             case spy::gadget::GadgetEnum::HAIRDRYER:
                 for (const auto &id: s.removedClammyClothes) {
                     if (libClient.hasCharacterFaction(id, spy::character::FactionEnum::PLAYER1).value() == 1) {
-                        retVal += 1;
+                        retVal += midChance;
                     } else {
                         return -std::numeric_limits<double>::infinity(); // do not dry persons that are not your faction
                     }
@@ -453,12 +453,32 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
                     1) {
                     return -std::numeric_limits<double>::infinity(); // do not put gadget to person of own faction
                 } else {
-                    retVal += 1;
+                    retVal += midChance;
                 }
                 break;
-            case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM:
-                // TODO
+            case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM: {
+                int counter;
+                auto myFaction = libClient.getMyFactionList();
+                for (const auto &id: myFaction) {
+                    auto character = s.getCharacters().findByUUID(id);
+                    if (character->getCoordinates().has_value()) {
+                        auto val = (maxPlayingFieldDim -
+                                    spy::gameplay::Movement::getMoveDistance(character->getCoordinates().value(),
+                                                                             s.invertedRoulette));
+                        if (character->hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
+                            counter -= val;
+                        }
+                        if (character->hasProperty(spy::character::PropertyEnum::JINX)) {
+                            counter += val;
+                        }
+                    }
+                }
+                if (counter != 0) {
+                    double val = s.getMap().getField(s.invertedRoulette).getChipAmount().value() / maxChipsInCasino;
+                    retVal += counter > 0 ? val : -val;
+                }
                 break;
+            }
             case spy::gadget::GadgetEnum::BOWLER_BLADE:
                 // already in health points eval
                 break;
@@ -469,7 +489,7 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
                                                           spy::character::FactionEnum::PLAYER1).value() == 1) {
                             return -std::numeric_limits<double>::infinity(); // do not poison cocktail hold by person of your faction
                         } else {
-                            retVal += 1;
+                            retVal += config.getCocktailHealthPoints();
                         }
                     }
                 }
@@ -482,12 +502,12 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
                             if (!pair.second) {
                                 return -std::numeric_limits<double>::infinity(); // do not remove healthy cocktail hold by person of your faction
                             } else {
-                                retVal += 1; // do remove poisoned cocktail hold by person of your faction
+                                retVal += config.getCocktailHealthPoints(); // do remove poisoned cocktail hold by person of your faction
                             }
                         } else if (!pair.second) {
                             return -std::numeric_limits<double>::infinity(); // do not remove poisoned cocktail hold by person of other faction
                         } else if (pair.second) {
-                            retVal += 1; // do remove healthy cocktail hold by person of other faction
+                            retVal += config.getCocktailHealthPoints(); // do remove healthy cocktail hold by person of other faction
                         }
                     }
                 }
@@ -501,14 +521,39 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
             case spy::gadget::GadgetEnum::MOTHBALL_POUCH:
                 // already in health points eval
                 break;
-            case spy::gadget::GadgetEnum::FOG_TIN:
-                // TODO std::vector<spy::util::Point> foggyFields;
+            case spy::gadget::GadgetEnum::FOG_TIN: {
+                double myCounter = 0;
+                double enemyCounter = 0;
+                for (const auto &p: s.foggyFields) {
+                    auto character = spy::util::GameLogicUtils::findInCharacterSetByCoordinates(s.getCharacters(), p);
+                    if (character != s.getCharacters().end()) {
+                        // character on field
+                        if (libClient.hasCharacterFaction(character->getCharacterId(),
+                                                          spy::character::FactionEnum::PLAYER1).value() == 1) {
+                            myCounter += 1;
+                        } else {
+                            auto isEnemy = libClient.hasCharacterFaction(character->getCharacterId(),
+                                                                         spy::character::FactionEnum::PLAYER2);
+                            if (isEnemy.has_value()) {
+                                enemyCounter += isEnemy.value();
+                            } else {
+                                enemyCounter += enemyNullopt;
+                            }
+                        }
+                    }
+                }
+
+                if (myCounter >= enemyCounter) {
+                    return -std::numeric_limits<double>::infinity(); // do not set your faction more in fog than enemy faction
+                }
+                retVal += enemyNullopt - myCounter;
                 break;
+            }
             case spy::gadget::GadgetEnum::GRAPPLE:
                 // already in collectedGadgets eval
                 break;
             case spy::gadget::GadgetEnum::WIRETAP_WITH_EARPLUGS:
-                // TODO
+                retVal += 1 - config.getWiretapWithEarplugsFailChance();
                 break;
             case spy::gadget::GadgetEnum::DIAMOND_COLLAR:
                 retVal += config.getCatIp() + 1000000;
@@ -517,20 +562,48 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
                 // already in movement eval
                 break;
             case spy::gadget::GadgetEnum::CHICKEN_FEED:
-                // TODO std::pair<std::optional<double>, std::optional<spy::util::UUID>> chickenfeedResult;
+                if (s.chickenfeedResult.first.has_value()) {
+                    if (s.chickenfeedResult.first.value() <= 0.5) {
+                        return -std::numeric_limits<double>::infinity(); // to unsure, do not waste chicken feed
+                    } else {
+                        retVal += s.chickenfeedResult.first.value() - 0.5;
+                    }
+                }
+                if (s.chickenfeedResult.second.has_value()) {
+                    if (libClient.hasCharacterFaction(s.chickenfeedResult.second.value(),
+                                                      spy::character::FactionEnum::PLAYER1) == 1) {
+                        retVal += s.chickenfeedResult.first.value();
+                    } else {
+                        return -std::numeric_limits<double>::infinity(); // do not give ip to other factions
+                    }
+                }
                 break;
             case spy::gadget::GadgetEnum::NUGGET:
-                // TODO std::optional<double> nuggetResult;
+                if (s.nuggetResult.has_value()) {
+                    if (s.nuggetResult.value() <= 0.5) {
+                        return -std::numeric_limits<double>::infinity(); // to unsure to use nugget
+                    } else {
+                        retVal += s.nuggetResult.value() - 0.5;
+                    }
+                }
                 break;
             case spy::gadget::GadgetEnum::MIRROR_OF_WILDERNESS:
-                // TODO std::pair<int, std::optional<spy::util::UUID>> mowResult;
+                if (s.mowResult.second.has_value()) {
+                    if (libClient.hasCharacterFaction(s.mowResult.second.value(),
+                                                      spy::character::FactionEnum::PLAYER1) == 1) {
+                        retVal += s.mowResult.first;
+                    } else {
+                        return -std::numeric_limits<double>::infinity(); // do not give ip to other factions
+                    }
+                }
+                retVal += s.mowResult.first;
                 break;
             case spy::gadget::GadgetEnum::COCKTAIL:
                 for (const auto &id: s.addedClammyClothes) {
                     if (libClient.hasCharacterFaction(id, spy::character::FactionEnum::PLAYER1).value() == 1) {
                         return -std::numeric_limits<double>::infinity(); // do not wet persons that are in your faction
                     } else {
-                        retVal += 1;
+                        retVal += midChance;
                     }
                 }
                 break;
@@ -542,8 +615,36 @@ double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::
     // gamble
     retVal += s.chipDiff;
 
-    // property
-    // TODO std::vector<std::optional<double>> observationResult; std::vector<spy::util::Point> destroyedRoulettes;
+    // property observation
+    for (const auto &val: s.observationResult) {
+        if (val.value() <= 0.5) {
+            return -std::numeric_limits<double>::infinity(); // to unsure to use observation
+        } else {
+            retVal += val.value() - 0.5;
+        }
+    }
+    // property bang and burn
+    auto myFaction = libClient.getMyFactionList();
+    for (const auto &p: s.destroyedRoulettes) {
+        int counter = 0;
+        for (const auto &id: myFaction) {
+            auto character = s.getCharacters().findByUUID(id);
+            if (character->getCoordinates().has_value()) {
+                auto val = (maxPlayingFieldDim -
+                            spy::gameplay::Movement::getMoveDistance(character->getCoordinates().value(), p));
+                if (character->hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
+                    counter -= val;
+                }
+                if (character->hasProperty(spy::character::PropertyEnum::JINX)) {
+                    counter += val;
+                }
+            }
+        }
+        if (counter != 0) {
+            double val = s.getMap().getField(p).getChipAmount().value() / maxChipsInCasino;
+            retVal += counter > 0 ? val : -val;
+        }
+    }
 
     // spy
     // TODO std::vector<std::pair<spy::util::UUID, std::optional<double>>> spyResult; std::vector<spy::util::Point> spyedSafes;

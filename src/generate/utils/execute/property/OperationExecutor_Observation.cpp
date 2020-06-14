@@ -27,9 +27,9 @@ OperationExecutor::executeObservation(const spy::gameplay::State_AI &state, cons
         if (targetHasPocketLitter.value() == 1) {
             return {}; // action is not useful (no new information will be gained) -> do not continue branch
         }
-        sSuccess.observationResult.push_back(1 - targetHasPocketLitter.value());
+        sSuccess.observationResult.emplace_back(1 - targetHasPocketLitter.value());
     } else {
-        sSuccess.observationResult.push_back(std::nullopt);
+        sSuccess.observationResult.emplace_back(std::nullopt);
     }
 
     return {sSuccess};
