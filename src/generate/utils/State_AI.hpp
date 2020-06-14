@@ -24,12 +24,14 @@ namespace spy::gameplay {
                                                                                    catCoordinates,
                                                                                    janitorCoordinates) {};
 
-            explicit State_AI(const State &s) : State(s) {};
+            explicit State_AI(const State &s, const spy::util::UUID characterId) : State(
+                    s) { startPoint = this->getCharacters().findByUUID(characterId)->getCoordinates().value(); };
 
             bool wasHoneyTrapUsed = false; // reset to false for each new operation execution
             double stateChance = 1;
             std::vector<std::shared_ptr<BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
+            spy::util::Point startPoint;
             std::vector<spy::gadget::GadgetEnum> collectedGadgets;
             std::vector<spy::gadget::GadgetEnum> usedGadgets;
             int chipDiff = 0;

@@ -16,7 +16,10 @@ class GameOperation_gen {
 
         static std::shared_ptr<spy::gameplay::BaseOperation>
         generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
-                 const spy::MatchConfig &config, const libclient::LibClient &libClient);
+                 const spy::MatchConfig &config,
+                 const spy::scenario::Scenario &scenarioConfig,
+                 const std::vector<spy::character::CharacterInformation> &characterConfig,
+                 const libclient::LibClient &libClient);
 
     private:
         static std::shared_ptr<spy::gameplay::BaseOperation>
@@ -24,6 +27,8 @@ class GameOperation_gen {
 
         static std::shared_ptr<spy::gameplay::BaseOperation>
         caro(const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config,
+             const spy::scenario::Scenario &scenarioConfig,
+             const std::vector<spy::character::CharacterInformation> &characterConfig,
              const libclient::LibClient &libClient);
 };
 

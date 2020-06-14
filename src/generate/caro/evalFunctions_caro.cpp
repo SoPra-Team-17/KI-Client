@@ -4,42 +4,42 @@
 
 #include "evalFunctions_caro.hpp"
 
-bool evalFunctions_caro::staticVarsSet;
+bool evalFunctions_caro::staticVarsSet = false;
 
-double evalFunctions_caro::maxPlayingFieldDim;
-double evalFunctions_caro::numBarTables;
-double evalFunctions_caro::numRouletteTables;
-double evalFunctions_caro::numWalls;
-double evalFunctions_caro::numFree;
-double evalFunctions_caro::numBarSeats;
-double evalFunctions_caro::numSafes;
-double evalFunctions_caro::numFireplaces;
-double evalFunctions_caro::numFields;
+double evalFunctions_caro::maxPlayingFieldDim = 0;
+double evalFunctions_caro::numBarTables = 0;
+double evalFunctions_caro::numRouletteTables = 0;
+double evalFunctions_caro::numWalls = 0;
+double evalFunctions_caro::numFree = 0;
+double evalFunctions_caro::numBarSeats = 0;
+double evalFunctions_caro::numSafes = 0;
+double evalFunctions_caro::numFireplaces = 0;
+double evalFunctions_caro::numFields = 0;
 
-double evalFunctions_caro::midChipsPerRoulette;
-double evalFunctions_caro::midChance;
-double evalFunctions_caro::midHitChanceWithDamage;
-double evalFunctions_caro::midRangeWithDamage;
-double evalFunctions_caro::midDamage;
+double evalFunctions_caro::midChipsPerRoulette = 0;
+double evalFunctions_caro::midChance = 0;
+double evalFunctions_caro::midHitChanceWithDamage = 0;
+double evalFunctions_caro::midRangeWithDamage = 0;
+double evalFunctions_caro::midDamage = 0;
 
-double evalFunctions_caro::numCharacter;
-double evalFunctions_caro::numNimbleness;
-double evalFunctions_caro::numSluggishness;
-double evalFunctions_caro::numPonderousness;
-double evalFunctions_caro::numSpryness;
-double evalFunctions_caro::numAgility;
-double evalFunctions_caro::numLuckyDevil;
-double evalFunctions_caro::numJinx;
-double evalFunctions_caro::numClammyClothes;
-double evalFunctions_caro::numConstantClammyClothes;
-double evalFunctions_caro::numRobustStomach;
-double evalFunctions_caro::numToughness;
-double evalFunctions_caro::numBabysitter;
-double evalFunctions_caro::numHoneyTrap;
-double evalFunctions_caro::numBangAndBurn;
-double evalFunctions_caro::numFlapsAndSeals;
-double evalFunctions_caro::numTradecraft;
-double evalFunctions_caro::numObservation;
+double evalFunctions_caro::numCharacter = 0;
+double evalFunctions_caro::numNimbleness = 0;
+double evalFunctions_caro::numSluggishness = 0;
+double evalFunctions_caro::numPonderousness = 0;
+double evalFunctions_caro::numSpryness = 0;
+double evalFunctions_caro::numAgility = 0;
+double evalFunctions_caro::numLuckyDevil = 0;
+double evalFunctions_caro::numJinx = 0;
+double evalFunctions_caro::numClammyClothes = 0;
+double evalFunctions_caro::numConstantClammyClothes = 0;
+double evalFunctions_caro::numRobustStomach = 0;
+double evalFunctions_caro::numToughness = 0;
+double evalFunctions_caro::numBabysitter = 0;
+double evalFunctions_caro::numHoneyTrap = 0;
+double evalFunctions_caro::numBangAndBurn = 0;
+double evalFunctions_caro::numFlapsAndSeals = 0;
+double evalFunctions_caro::numTradecraft = 0;
+double evalFunctions_caro::numObservation = 0;
 
 double evalFunctions_caro::maxChipsInCasino;
 double evalFunctions_caro::chipsToIpJudge;
@@ -360,13 +360,194 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
     return retChar;
 }
 
-double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &/*characterId*/,
-                                         const libclient::LibClient &/*libClient*/) {
-    double retVal = -std::numeric_limits<double>::infinity();
-    // TODO implement: hp, ip, chips (to ip), diamond collar, nearness (npc, safe, cat, janitor, roulette, cocktail (poisoned), seat)
-    // TODO implement: collecting gadgets, using gadgets
-    // TODO implement: rate worse actions with -std::numeric_limits<double>::infinity()
-    // TODO implement: use * or + ?
+double evalFunctions_caro::gameOperation(spy::gameplay::State_AI &s, const spy::util::UUID &characterId,
+                                         const spy::MatchConfig &config,
+                                         const spy::scenario::Scenario &scenarioConfig,
+                                         const std::vector<spy::character::CharacterInformation> &characterConfig,
+                                         const libclient::LibClient &libClient) {
+    double retVal = 0;
+
+    // modify nullopts in state
+    auto numMyChar = libClient.getMyFactionList().size();
+    auto numEnemyChar = libClient.getEnemyFactionList().size();
+    auto numNpcChar = libClient.getNpcFactionList().size();
+    auto numKnownChar = numMyChar + numEnemyChar + numNpcChar;
+    auto numUnknownChar = libClient.getUnknownFactionList().size();
+
+    double gadgetNullopt = 1 / (numCharacter - numMyChar);
+    double npcNullopt; //TODO
+    double enemyNullopt; //TODO
+    for (auto &val: s.observationResult) {
+        if (!val.has_value()) {
+            val = gadgetNullopt;
+        }
+    }
+    if (!s.nuggetResult.has_value()) {
+        s.nuggetResult = npcNullopt;
+    }
+    for (auto &val: s.spyResult) {
+        if (!val.second.has_value()) {
+            val.second = npcNullopt;
+        }
+    }
+    if (!s.chickenfeedResult.first.has_value()) {
+        s.chickenfeedResult.first = enemyNullopt;
+    }
+    s.stateChance *= std::pow(gadgetNullopt, s.unknownGadgetsModifyingSuccess);
+
+    // collected gadgets that were not used
+    auto used = s.usedGadgets;
+    for (auto &gad: s.collectedGadgets) {
+        auto g = std::find(used.begin(), used.end(), gad);
+        if (g != used.end()) {
+            used.erase(g);
+            retVal += itemChoice(gad, config, scenarioConfig, characterConfig);
+            if (gad == spy::gadget::GadgetEnum::DIAMOND_COLLAR) {
+                retVal += config.getCatIp() + 1000;
+            } else if (gad == spy::gadget::GadgetEnum::COCKTAIL) {
+                retVal += config.getCocktailHealthPoints();
+            }
+        }
+    }
+
+    // health points
+    int myHp = 0;
+    int enemyHp = 0;
+    for (const auto &pair: s.hpDiff) {
+        if (libClient.hasCharacterFaction(pair.first, spy::character::FactionEnum::PLAYER1).value() == 1) {
+            myHp += pair.second;
+        } else {
+            auto isEnemy = libClient.hasCharacterFaction(pair.first, spy::character::FactionEnum::PLAYER2);
+            if (isEnemy.has_value()) {
+                enemyHp += pair.second * isEnemy.value();
+            } else {
+                enemyHp += pair.second * enemyNullopt;
+            }
+        }
+    }
+    if (enemyHp >= myHp) {
+        return -std::numeric_limits<double>::infinity(); // do not damage your faction more than enemy faction
+    }
+    retVal += myHp - enemyHp;
+
+    // movement
+    spy::util::Point endPoint = s.getCharacters().findByUUID(characterId)->getCoordinates().value();
+    if (endPoint != s.startPoint) {
+        // TODO: nearness (npc, safe, cat, janitor, roulette, cocktail (not poisoned), seat)
+    }
+
+    // gadget TODO not always +1
+    for (auto &usedG: s.usedGadgets) {
+        switch (usedG) {
+            case spy::gadget::GadgetEnum::HAIRDRYER:
+                for (const auto &id: s.removedClammyClothes) {
+                    if (libClient.hasCharacterFaction(id, spy::character::FactionEnum::PLAYER1).value() == 1) {
+                        retVal += 1;
+                    } else {
+                        return -std::numeric_limits<double>::infinity(); // do not dry persons that are not your faction
+                    }
+                }
+                break;
+            case spy::gadget::GadgetEnum::MOLEDIE:
+                if (libClient.hasCharacterFaction(s.movedMoledieTo, spy::character::FactionEnum::PLAYER1).value() ==
+                    1) {
+                    return -std::numeric_limits<double>::infinity(); // do not put gadget to person of own faction
+                } else {
+                    retVal += 1;
+                }
+                break;
+            case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM:
+                // TODO
+                break;
+            case spy::gadget::GadgetEnum::BOWLER_BLADE:
+                // already in health points eval
+                break;
+            case spy::gadget::GadgetEnum::POISON_PILLS:
+                for (const auto &val: s.poisonedCocktails) {
+                    if (std::holds_alternative<spy::util::UUID>(val)) {
+                        if (libClient.hasCharacterFaction(std::get<spy::util::UUID>(val),
+                                                          spy::character::FactionEnum::PLAYER1).value() == 1) {
+                            return -std::numeric_limits<double>::infinity(); // do not poison cocktail hold by person of your faction
+                        } else {
+                            retVal += 1;
+                        }
+                    }
+                }
+                break;
+            case spy::gadget::GadgetEnum::LASER_COMPACT:
+                for (const auto &pair: s.removedCocktails) {
+                    if (std::holds_alternative<spy::util::UUID>(pair.first)) {
+                        if (libClient.hasCharacterFaction(std::get<spy::util::UUID>(pair.first),
+                                                          spy::character::FactionEnum::PLAYER1).value() == 1) {
+                            if (!pair.second) {
+                                return -std::numeric_limits<double>::infinity(); // do not remove healthy cocktail hold by person of your faction
+                            } else {
+                                retVal += 1; // do remove poisoned cocktail hold by person of your faction
+                            }
+                        } else if (!pair.second) {
+                            return -std::numeric_limits<double>::infinity(); // do not remove poisoned cocktail hold by person of other faction
+                        } else if (pair.second) {
+                            retVal += 1; // do remove healthy cocktail hold by person of other faction
+                        }
+                    }
+                }
+                break;
+            case spy::gadget::GadgetEnum::ROCKET_PEN:
+                // already in movement eval
+                break;
+            case spy::gadget::GadgetEnum::GAS_GLOSS:
+                // already in health points eval
+                break;
+            case spy::gadget::GadgetEnum::MOTHBALL_POUCH:
+                // already in health points eval
+                break;
+            case spy::gadget::GadgetEnum::FOG_TIN:
+                // TODO std::vector<spy::util::Point> foggyFields;
+                break;
+            case spy::gadget::GadgetEnum::GRAPPLE:
+                // already in collectedGadgets eval
+                break;
+            case spy::gadget::GadgetEnum::WIRETAP_WITH_EARPLUGS:
+                // TODO
+                break;
+            case spy::gadget::GadgetEnum::DIAMOND_COLLAR:
+                retVal += config.getCatIp() + 1000000;
+                break;
+            case spy::gadget::GadgetEnum::JETPACK:
+                // already in movement eval
+                break;
+            case spy::gadget::GadgetEnum::CHICKEN_FEED:
+                // TODO std::pair<std::optional<double>, std::optional<spy::util::UUID>> chickenfeedResult;
+                break;
+            case spy::gadget::GadgetEnum::NUGGET:
+                // TODO std::optional<double> nuggetResult;
+                break;
+            case spy::gadget::GadgetEnum::MIRROR_OF_WILDERNESS:
+                // TODO std::pair<int, std::optional<spy::util::UUID>> mowResult;
+                break;
+            case spy::gadget::GadgetEnum::COCKTAIL:
+                for (const auto &id: s.addedClammyClothes) {
+                    if (libClient.hasCharacterFaction(id, spy::character::FactionEnum::PLAYER1).value() == 1) {
+                        return -std::numeric_limits<double>::infinity(); // do not wet persons that are in your faction
+                    } else {
+                        retVal += 1;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    // gamble
+    retVal += s.chipDiff;
+
+    // property
+    // TODO std::vector<std::optional<double>> observationResult; std::vector<spy::util::Point> destroyedRoulettes;
+
+    // spy
+    // TODO std::vector<std::pair<spy::util::UUID, std::optional<double>>> spyResult; std::vector<spy::util::Point> spyedSafes;
+
     return retVal * s.stateChance;
 }
 

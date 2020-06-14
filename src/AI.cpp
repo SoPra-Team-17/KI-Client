@@ -114,7 +114,9 @@ void AI::onRequestGameOperation() {
 
     auto start = std::chrono::high_resolution_clock::now();
     auto nextOperation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
-                                                     libClientHandler.getState(), matchConfig.value(), libClientHandler);
+                                                     libClientHandler.getState(), matchConfig.value(),
+                                                     scenarioConfig.value(),
+                                                     characterConfig.value(), libClientHandler);
     auto stop = std::chrono::high_resolution_clock::now();
     auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 

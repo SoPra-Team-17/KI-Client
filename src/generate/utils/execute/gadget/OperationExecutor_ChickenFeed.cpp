@@ -27,7 +27,6 @@ OperationExecutor::executeChickenFeed(const spy::gameplay::State_AI &state, cons
     } else {
         s.chickenfeedResult.first = std::nullopt;
     }
-    // TODO (optional): ipDiff but ip are currently not tracked by libClient object
 
     // check wiretap with earplugs gadget
     auto character = spy::util::GameLogicUtils::getWiredCharacter(s, *sourceChar);

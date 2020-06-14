@@ -22,7 +22,7 @@ std::vector<spy::gameplay::State_AI> OperationExecutor::executeMirrorOfWildernes
         sSuccess.modStateChance(*sourceChar, config.getMirrorSwapChance());
     }
 
-    // TODO (optional): only working correct for sameFacion as ip are currently not tracked by libClient object
+    // only working correct for sameFaction as ip are currently not tracked by libClient object
     auto sourceCharIP = sourceChar->getIntelligencePoints();
     auto targetCharIP = targetChar->getIntelligencePoints();
     sourceChar->setIntelligencePoints(targetCharIP);
