@@ -12,13 +12,13 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
                         const spy::scenario::Scenario &scenarioConfig,
                         const std::vector<spy::character::CharacterInformation> &characterConfig,
                         const libclient::LibClient &libClient) {
-    spy::gameplay::State_AI state{s, characterId};
+    spy::gameplay::State_AI state{s};
     auto endStates = state.getLeafSuccessorStates(characterId, config, libClient);
 
     std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute;
     double endVal = -std::numeric_limits<double>::infinity();
     for (auto &endS: endStates) {
-        double val = evalFunctions_caro::gameOperation(endS, characterId, config, scenarioConfig, characterConfig,
+        double val = evalFunctions_caro::gameOperation(state, endS, characterId, config, scenarioConfig, characterConfig,
                                                        libClient);
         if (val > endVal) {
             endVal = val;

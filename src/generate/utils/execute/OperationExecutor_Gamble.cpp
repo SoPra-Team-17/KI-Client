@@ -25,7 +25,7 @@ OperationExecutor::executeGamble(const spy::gameplay::State_AI &state, const spy
     } else if (character->hasProperty(spy::character::PropertyEnum::JINX)) {
         winningChance = 13.0/37.0;
     }
-    winningChance = targetField.isInverted() ? (1-winningChance) : winningChance;
+    winningChance = targetField.isInverted().value() ? (1-winningChance) : winningChance;
     sWon.modStateChance(*character, winningChance);
 
     // won in roulette

@@ -29,7 +29,7 @@ class evalFunctions_caro {
                                                const std::vector<spy::character::CharacterInformation> &characterConfig);
 
         static double
-        gameOperation(spy::gameplay::State_AI &s, const spy::util::UUID &characterId, const spy::MatchConfig &config,
+        gameOperation(const spy::gameplay::State_AI &start, spy::gameplay::State_AI &s, const spy::util::UUID &characterId, const spy::MatchConfig &config,
                       const spy::scenario::Scenario &scenarioConfig,
                       const std::vector<spy::character::CharacterInformation> &characterConfig,
                       const libclient::LibClient &libClient);
@@ -50,6 +50,9 @@ class evalFunctions_caro {
         static double numSafes;
         static double numFireplaces;
         static double numFields;
+        static std::vector<spy::util::Point> safePositions;
+        static std::vector<spy::util::Point> roulettetablePositions;
+        static std::vector<spy::util::Point> bartablePositions;
 
         static double midChipsPerRoulette;
         static double midChance;
