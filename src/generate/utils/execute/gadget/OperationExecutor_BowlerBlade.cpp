@@ -14,6 +14,7 @@ OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, cons
     spy::gameplay::State_AI sSuccess = state;
 
     auto character = sSuccess.getCharacters().getByUUID(op.getCharacterId());
+    character->removeGadget(op.getGadget());
 
     if (config.getBowlerBladeHitChance() == 0) {
         return {};
@@ -62,10 +63,9 @@ OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, cons
         spy::gameplay::State_AI buf = sSuccess;
         buf.stateChance *= 1 / newHatPoints.size();
         buf.getMap().getField(p).setGadget(character->getGadget(spy::gadget::GadgetEnum::BOWLER_BLADE));
-        buf.getCharacters().getByUUID(op.getCharacterId())->removeGadget(op.getGadget());
         myStates.push_back(buf);
     }
 
     honeyStates.insert(honeyStates.end(), myStates.begin(), myStates.end());
-    return {honeyStates};
+    return honeyStates;
 }

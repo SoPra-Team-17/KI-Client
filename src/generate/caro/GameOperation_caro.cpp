@@ -15,7 +15,7 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
     std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute;
     double endVal = -std::numeric_limits<double>::infinity();
     for (const auto &endS: endStates) {
-        double val = evalFunctions_caro::gameOperation(endS, characterId);
+        double val = evalFunctions_caro::gameOperation(endS, characterId, libClient);
         if (val > endVal) {
             endVal = val;
             operationToExecute = endS.operationsLeadingToState[0];

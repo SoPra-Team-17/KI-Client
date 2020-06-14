@@ -360,7 +360,8 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
     return retChar;
 }
 
-double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &/*characterId*/) {
+double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &/*characterId*/,
+                                         const libclient::LibClient &/*libClient*/) {
     double retVal = -std::numeric_limits<double>::infinity();
     // TODO implement: hp, ip, chips (to ip), diamond collar, nearness (npc, safe, cat, janitor, roulette, cocktail (poisoned), seat)
     // TODO implement: collecting gadgets, using gadgets

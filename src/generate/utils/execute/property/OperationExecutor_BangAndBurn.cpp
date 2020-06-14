@@ -9,6 +9,7 @@ OperationExecutor::executeBangAndBurn(const spy::gameplay::State_AI &state, cons
     spy::gameplay::State_AI s = state;
 
     s.getMap().getField(op.getTarget()).setDestroyed(true);
+    s.destroyedRoulettes.push_back(op.getTarget());
 
     return {s};
 }

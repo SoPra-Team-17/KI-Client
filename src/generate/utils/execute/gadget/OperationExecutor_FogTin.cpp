@@ -18,6 +18,7 @@ OperationExecutor::executeFogTin(const spy::gameplay::State_AI &state, const spy
     if (points.second) {
         for (const auto &p : points.first) {
             s.getMap().getField(p).setFoggy(true);
+            s.foggyFields.push_back(p);
         }
     }
 

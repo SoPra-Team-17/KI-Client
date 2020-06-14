@@ -59,7 +59,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executeGasGloss(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                        const spy::MatchConfig &config);
+                        const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeHairDryer(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op);
@@ -77,7 +77,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executeLaserCompact(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                            const spy::MatchConfig &config);
+                            const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeChickenFeed(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op);
@@ -87,15 +87,16 @@ class OperationExecutor {
                                   const spy::MatchConfig &config);
 
         static std::vector<spy::gameplay::State_AI>
-        executeNugget(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op);
+        executeNugget(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
+                      const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeRocketPen(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                         const spy::MatchConfig &config);
+                         const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeMoleDie(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                       const spy::MatchConfig &config);
+                       const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeFogTin(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op);
@@ -105,7 +106,7 @@ class OperationExecutor {
 
         static std::vector<spy::gameplay::State_AI>
         executePoisonPills(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
-                           const spy::MatchConfig &config);
+                           const spy::MatchConfig &config, const libclient::LibClient &libClient);
 
         static std::vector<spy::gameplay::State_AI>
         executeMothballPouch(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,

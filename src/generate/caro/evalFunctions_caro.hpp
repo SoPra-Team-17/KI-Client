@@ -28,7 +28,8 @@ class evalFunctions_caro {
                                                const spy::scenario::Scenario &scenarioConfig,
                                                const std::vector<spy::character::CharacterInformation> &characterConfig);
 
-        static double gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &characterId);
+        static double gameOperation(const spy::gameplay::State_AI &s, const spy::util::UUID &characterId,
+                                    const libclient::LibClient &libClient);
 
     private:
         static void setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,

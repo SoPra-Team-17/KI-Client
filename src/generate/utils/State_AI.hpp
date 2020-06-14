@@ -38,7 +38,14 @@ namespace spy::gameplay {
             std::set<spy::util::UUID> removedClammyClothes;
             std::map<spy::util::UUID, int> hpDiff;
             std::vector<std::optional<double>> observationResult; // if nullopt modify this value (no info about pocket litter)
+            double nuggetResult;
             int unknownGadgetsModifyingSuccess; // for each gadget modify stateChance
+            std::vector<std::pair<std::variant<spy::util::UUID, spy::util::Point>, bool>> removedCocktails;
+            std::vector<std::variant<spy::util::UUID, spy::util::Point>> poisonedCocktails;
+            std::vector<spy::util::Point> destroyedRoulettes;
+            spy::util::Point invertedRoulette;
+            std::vector<spy::util::Point> foggyFields;
+            std::vector<spy::util::Point> destroyedWalls;
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                                        const spy::MatchConfig &config,

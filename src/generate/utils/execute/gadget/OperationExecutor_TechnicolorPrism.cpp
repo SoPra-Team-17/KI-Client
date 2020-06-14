@@ -10,6 +10,7 @@ std::vector<spy::gameplay::State_AI> OperationExecutor::executeTechnicolorPrism(
 
     // invert roulette table
     s.getMap().getField(op.getTarget()).setInverted(true);
+    s.invertedRoulette = op.getTarget();
 
     // remove technicolor prism from inventory
     auto character = s.getCharacters().getByUUID(op.getCharacterId());

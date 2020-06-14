@@ -94,18 +94,28 @@ namespace spy::gameplay {
         bool foundAlternatives = false;
 
         auto sourceChar = this->getCharacters().findByUUID(op.getCharacterId());
+        auto targetChar = util::GameLogicUtils::findInCharacterSetByCoordinates(this->getCharacters(),
+                                                                                op.getTarget());
 
-        if (!this->wasHoneyTrapUsed && config.getHoneyTrapSuccessChance() != 0) {
-            auto targetChar = util::GameLogicUtils::findInCharacterSetByCoordinates(this->getCharacters(),
-                                                                                    op.getTarget());
-
+        if (!this->wasHoneyTrapUsed && config.getHoneyTrapSuccessChance() != 0 && targetChar != this->getCharacters().end()) {
             if (targetChar->hasProperty(spy::character::PropertyEnum::HONEY_TRAP)) {
                 auto otherOps = this->getHoneyTrapAlternatives(op, config);
                 if (!otherOps.empty()) {
                     foundAlternatives = true;
+
+                    // copy and modify state
                     State_AI s = *this;
                     s.wasHoneyTrapUsed = true;
                     s.modStateChance(*sourceChar, config.getHoneyTrapSuccessChance() / otherOps.size());
+
+                    // reset stuff from executeGadget base method
+                    s.operationsLeadingToState.pop_back();
+                    s.usedGadgets.pop_back();
+                    auto character = s.getCharacters().getByUUID(op.getCharacterId());
+                    character->setActionPoints(character->getActionPoints() + 1);
+                    s.isLeafState = false;
+
+                    // handle possible states due to honeytrap
                     for (const auto &oOp: otherOps) {
                         auto honeyTrapState = OperationExecutor::executeGadget(s, oOp, config, libClient);
                         honeyTrapStates.insert(honeyTrapStates.end(), honeyTrapState.begin(), honeyTrapState.end());

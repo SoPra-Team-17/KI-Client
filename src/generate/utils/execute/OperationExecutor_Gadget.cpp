@@ -22,19 +22,19 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
         case GadgetEnum::HAIRDRYER:
             return executeHairDryer(s, op);
         case GadgetEnum::MOLEDIE:
-            return executeMoleDie(s, op, config);
+            return executeMoleDie(s, op, config, libClient);
         case GadgetEnum::TECHNICOLOUR_PRISM:
             return executeTechnicolorPrism(s, op);
         case GadgetEnum::BOWLER_BLADE:
             return executeBowlerBlade(s, op, config, libClient);
         case GadgetEnum::POISON_PILLS:
-            return executePoisonPills(s, op, config);
+            return executePoisonPills(s, op, config, libClient);
         case GadgetEnum::LASER_COMPACT:
-            return executeLaserCompact(s, op, config);
+            return executeLaserCompact(s, op, config, libClient);
         case GadgetEnum::ROCKET_PEN:
-            return executeRocketPen(s, op, config);
+            return executeRocketPen(s, op, config, libClient);
         case GadgetEnum::GAS_GLOSS:
-            return executeGasGloss(s, op, config);
+            return executeGasGloss(s, op, config, libClient);
         case GadgetEnum::MOTHBALL_POUCH:
             return executeMothballPouch(s, op, config);
         case GadgetEnum::FOG_TIN:
@@ -50,7 +50,7 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
         case GadgetEnum::CHICKEN_FEED:
             return executeChickenFeed(s, op);
         case GadgetEnum::NUGGET:
-            return executeNugget(s, op);
+            return executeNugget(s, op, libClient);
         case GadgetEnum::MIRROR_OF_WILDERNESS:
             return executeMirrorOfWilderness(s, op, config);
         case GadgetEnum::COCKTAIL:
