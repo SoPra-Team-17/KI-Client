@@ -441,7 +441,7 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
     if (enemyHp >= myHp) {
         return -std::numeric_limits<double>::infinity(); // do not damage your faction more than enemy faction
     }
-    retVal += myHp - enemyHp;
+    retVal += (myHp - enemyHp) * 10;
 
     // movement
     spy::util::Point startPoint = start.getCharacters().findByUUID(characterId)->getCoordinates().value();
