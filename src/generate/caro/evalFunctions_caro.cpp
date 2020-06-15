@@ -374,9 +374,9 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
     double retVal = 0;
 
     // modify nullopts in state
-    double numMyChar = libClient.getMyFactionList().size();
-    double numEnemyChar = libClient.getEnemyFactionList().size();
-    double numUnknownChar = libClient.getUnknownFactionList().size();
+    auto numMyChar = static_cast<double>(libClient.getMyFactionList().size());
+    auto numEnemyChar = static_cast<double>(libClient.getEnemyFactionList().size());
+    auto numUnknownChar = static_cast<double>(libClient.getUnknownFactionList().size());
     double gadgetNullopt = 1 / (numCharacter - numMyChar);
     double enemyNullopt = std::min(1.0, (std::max(0.0, 4 - numEnemyChar) + std::max(0.0, 3 - numEnemyChar) +
                                          std::max(0.0, 2 - numEnemyChar)) / (3 * numUnknownChar));
@@ -555,7 +555,7 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
                 }
                 break;
             case spy::gadget::GadgetEnum::TECHNICOLOUR_PRISM: {
-                int counter;
+                int counter = 0;
                 auto myFaction = libClient.getMyFactionList();
                 for (const auto &id: myFaction) {
                     auto myFactionChar = s.getCharacters().findByUUID(id);
