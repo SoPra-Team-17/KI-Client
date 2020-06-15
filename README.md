@@ -84,5 +84,6 @@ Flags for the AI-Client startup:
 * `-v <int>` / `--verbosity <int>` configuration of the logging verbosity (defaults to max verbosity)
 * `--x <key> <value>` can be used to give the server additional key-value pairs
     * `maxReconnect <int>` max number of reconnect attempts when connection to server is lost (defaults to 5)
+    * `delay <int>` if AI should delay its moves, 0 -> false, 1 -> true (defaults to 1 true)
     
 

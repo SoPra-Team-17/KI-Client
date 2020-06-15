@@ -50,6 +50,7 @@ class AI : public libclient::Callback {
         std::string name;
         unsigned int difficulty;
         unsigned int maxReconnect;
+        bool delay;
 
         libclient::LibClient libClientHandler;
         std::optional<spy::MatchConfig> matchConfig;
