@@ -174,7 +174,7 @@ void AI::onMetaInformation() {
             itemChoiceRequested = false;
             onRequestItemChoice();
         }
-    } catch (std::out_of_range &e) {
+    } catch (const std::out_of_range &/*e*/) {
         requestConfigs();
     }
 }

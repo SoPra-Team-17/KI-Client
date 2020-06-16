@@ -35,6 +35,7 @@ class evalFunctions_caro {
                       const libclient::LibClient &libClient);
 
     private:
+        static constexpr double maxHealthPoints = 100.0;
 
         static void setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,
                                   const std::vector<spy::character::CharacterInformation> &characterConfig);
@@ -80,7 +81,9 @@ class evalFunctions_caro {
         static double numObservation;
 
         static double maxChipsInCasino;
+        static double maxIpInCasino;
         static double chipsToIpJudge;
+        static double secretsToIpJudge;
 };
 
 
