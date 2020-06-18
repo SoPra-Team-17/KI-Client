@@ -27,7 +27,7 @@ namespace spy::gameplay {
             explicit State_AI(const State &s) : State(s) {};
 
             bool wasHoneyTrapUsed = false; // reset to false for each new operation execution
-            double stateChance = 1;
+            double stateChance = 1; // chance of state to occur
             std::vector<std::shared_ptr<BaseOperation>> operationsLeadingToState;
             bool isLeafState = false;
             std::vector<spy::gadget::GadgetEnum> collectedGadgets;
@@ -94,8 +94,8 @@ namespace spy::gameplay {
                                                                    const spy::MatchConfig &config,
                                                                    const libclient::LibClient &libClient);
 
-            std::vector<GadgetAction>
-            getHoneyTrapAlternatives(const GadgetAction &op, const MatchConfig &config) const;
+            [[nodiscard]] std::vector<GadgetAction>
+            getHoneyTrapAlternatives(GadgetAction a, const MatchConfig &config) const;
     };
 }
 

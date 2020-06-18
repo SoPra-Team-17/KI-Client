@@ -18,16 +18,44 @@ class evalFunctions_caro {
     public:
         evalFunctions_caro() = delete;
 
+        /**
+         * evaluates item choice
+         * @param offer character id or gadget type that got offered
+         * @param config current match config
+         * @param scenarioConfig current scenario config
+         * @param characterConfig current character information
+         * @return double indicating how good offer is (the higher the value the better)
+         */
         static double itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
                                  const spy::MatchConfig &config,
                                  const spy::scenario::Scenario &scenarioConfig,
                                  const std::vector<spy::character::CharacterInformation> &characterConfig);
 
+        /**
+         * evaluates which character should get gadget in equipment choice
+         * @param chosenCharacterIds ids of all characters that were chosen in the item choice phase
+         * @param chosenGadgetType type of gadget that should be mapped to a character
+         * @param config current match config
+         * @param scenarioConfig current scenario config
+         * @param characterConfig current character information
+         * @return character that should get gadget
+         */
         static spy::util::UUID equipmentChoice(const std::vector<spy::util::UUID> &chosenCharacterIds,
                                                spy::gadget::GadgetEnum chosenGadgetType, const spy::MatchConfig &config,
                                                const spy::scenario::Scenario &scenarioConfig,
                                                const std::vector<spy::character::CharacterInformation> &characterConfig);
 
+        /**
+         * evaluates state that results after character took its actions
+         * @param start State_AI before character took any actions
+         * @param s State_AI after character took its actions
+         * @param characterId id of the character that took actions
+         * @param config current match config
+         * @param scenarioConfig current scenario config
+         * @param characterConfig current character information
+         * @param libClient up to date libClient object for AIState information
+         * @return double indicating how good resulting state is (the higher the value the better)
+         */
         static double
         gameOperation(const spy::gameplay::State_AI &start, spy::gameplay::State_AI &s, const spy::util::UUID &characterId, const spy::MatchConfig &config,
                       const spy::scenario::Scenario &scenarioConfig,
@@ -35,24 +63,70 @@ class evalFunctions_caro {
                       const libclient::LibClient &libClient);
 
     private:
+        /**
+         * helper for gameOption method
+         * during the execution some Actions set nullopt into the state as they do not have enough information
+         * these nullopts are replaced by values here, as we have got the necessary information here
+         * @param s State_AI to processed
+         */
         static void modifyNulloptsInState(spy::gameplay::State_AI &s);
 
+        /**
+         * helper for gameOperation method
+         * evaluates the movement of the character
+         * @param start State_AI before character took any actions
+         * @param s State_AI after character took its actions
+         * @param characterId id of the character that took actions
+         * @param config current match config
+         * @param libClient up to date libClient object for AIState information
+         * @return double value to be added to return value of gameOperation
+         */
         static double evalPosition(const spy::gameplay::State_AI &start, const spy::gameplay::State_AI &s,
                                    const spy::util::UUID &characterId,
                                    const spy::MatchConfig &config,
                                    const libclient::LibClient &libClient);
 
+        /**
+         * helper for gameOperation method
+         * evaluates the health points that change during the turn of the character
+         * @param s State_AI after character took its actions
+         * @param characterId id of the character that took actions
+         * @param libClient up to date libClient object for AIState information
+         * @return double value to be added to return value of gameOperation
+         */
         static double evalHp(const spy::gameplay::State_AI &s,
                              const spy::util::UUID &characterId,
                              const libclient::LibClient &libClient);
 
+        /**
+         * helper for gameOperation method
+         * evaluates the gadgets used by the character during its turn
+         * @param s State_AI after character took its actions
+         * @param config current match config
+         * @param libClient up to date libClient object for AIState information
+         * @return double value to be added to return value of gameOperation
+         */
         static double evalUsedGadgets(const spy::gameplay::State_AI &s,
                                       const spy::MatchConfig &config,
                                       const libclient::LibClient &libClient);
 
+        /**
+         * helper for gameOperation method
+         * evaluates the properties used by the character during its turn
+         * @param s State_AI after character took its actions
+         * @param libClient up to date libClient object for AIState information
+         * @return double value to be added to return value of gameOperation
+         */
         static double evalUsedProperties(const spy::gameplay::State_AI &s,
                                          const libclient::LibClient &libClient);
 
+        /**
+         * helper for gameOperation method
+         * evaluates the spy results of the character during its turn
+         * @param s State_AI after character took its actions
+         * @param libClient up to date libClient object for AIState information
+         * @return double value to be added to return value of gameOperation
+         */
         static double evalSpy(const spy::gameplay::State_AI &s,
                               const libclient::LibClient &libClient);
 

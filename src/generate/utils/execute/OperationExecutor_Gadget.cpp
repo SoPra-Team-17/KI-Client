@@ -7,14 +7,18 @@
 std::vector<spy::gameplay::State_AI>
 OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy::gameplay::GadgetAction &op,
                                  const spy::MatchConfig &config, const libclient::LibClient &libClient) {
-    spy::gameplay::State_AI s = state;
-    s.operationsLeadingToState.push_back(std::make_shared<spy::gameplay::GadgetAction>(op));
-    s.usedGadgets.push_back(op.getGadget());
 
-    auto character = s.getCharacters().getByUUID(op.getCharacterId());
-    character->subActionPoint();
-    if (character->getMovePoints() == 0 && character->getActionPoints() == 0) {
-        s.isLeafState = true;
+    spy::gameplay::State_AI s = state;
+
+    if (!s.wasHoneyTrapUsed) {
+        s.operationsLeadingToState.push_back(std::make_shared<spy::gameplay::GadgetAction>(op));
+        s.usedGadgets.push_back(op.getGadget());
+
+        auto character = s.getCharacters().getByUUID(op.getCharacterId());
+        character->subActionPoint();
+        if (character->getMovePoints() == 0 && character->getActionPoints() == 0) {
+            s.isLeafState = true;
+        }
     }
 
     using namespace spy::gadget;

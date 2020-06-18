@@ -110,13 +110,6 @@ namespace spy::gameplay {
                     s.modStateChance(*sourceChar,
                                      config.getHoneyTrapSuccessChance() / static_cast<double>(otherOps.size()));
 
-                    // reset stuff from executeGadget base method
-                    s.operationsLeadingToState.pop_back();
-                    s.usedGadgets.pop_back();
-                    auto character = s.getCharacters().getByUUID(op.getCharacterId());
-                    character->setActionPoints(character->getActionPoints() + 1);
-                    s.isLeafState = false;
-
                     // handle possible states due to honeytrap
                     for (const auto &oOp: otherOps) {
                         auto honeyTrapState = OperationExecutor::executeGadget(s, oOp, config, libClient);
@@ -132,9 +125,7 @@ namespace spy::gameplay {
     }
 
     std::vector<GadgetAction>
-    State_AI::getHoneyTrapAlternatives(const GadgetAction &op, const MatchConfig &config) const {
-        GadgetAction a = op; // keep op const to know regular operation/target
-
+    State_AI::getHoneyTrapAlternatives(GadgetAction a, const MatchConfig &config) const {
         auto sourceChar = this->getCharacters().findByUUID(a.getCharacterId());
         auto targetChar = util::GameLogicUtils::findInCharacterSetByCoordinates(this->getCharacters(), a.getTarget());
 
@@ -151,7 +142,7 @@ namespace spy::gameplay {
             if (this->getMap().isInside(otherTarget)) {
                 a.setTarget(otherTarget);
                 if (gameplay::ActionValidator::validate(*this, std::make_shared<GadgetAction>(a), config)) {
-                    alternativeTargets.push_back(GadgetAction(a));
+                    alternativeTargets.emplace_back(a);
                 }
             }
         }

@@ -22,7 +22,7 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
                                                        libClient);
         if (val > endVal) {
             endVal = val;
-            operationToExecute = endS.operationsLeadingToState[0];
+            operationToExecute = endS.operationsLeadingToState.at(0);
         }
     }
 
