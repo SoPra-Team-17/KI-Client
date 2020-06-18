@@ -35,7 +35,38 @@ class evalFunctions_caro {
                       const libclient::LibClient &libClient);
 
     private:
+        static void modifyNulloptsInState(spy::gameplay::State_AI &s);
+
+        static double evalPosition(const spy::gameplay::State_AI &start, const spy::gameplay::State_AI &s,
+                                   const spy::util::UUID &characterId,
+                                   const spy::MatchConfig &config,
+                                   const libclient::LibClient &libClient);
+
+        static double evalHp(const spy::gameplay::State_AI &s,
+                             const spy::util::UUID &characterId,
+                             const libclient::LibClient &libClient);
+
+        static double evalUsedGadgets(const spy::gameplay::State_AI &s,
+                                      const spy::MatchConfig &config,
+                                      const libclient::LibClient &libClient);
+
+        static double evalUsedProperties(const spy::gameplay::State_AI &s,
+                                         const libclient::LibClient &libClient);
+
+        static double evalSpy(const spy::gameplay::State_AI &s,
+                              const libclient::LibClient &libClient);
+
         static constexpr double maxHealthPoints = 100.0;
+        static constexpr double winningReason = 10;
+        static constexpr double unsureLimit = 0.5;
+
+        static double numMyChar;
+        static double numEnemyChar;
+        static double numUnknownChar;
+        static double gadgetNullopt;
+        static double enemyNullopt;
+        static double npcNullopt;
+
 
         static void setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,
                                   const std::vector<spy::character::CharacterInformation> &characterConfig);
