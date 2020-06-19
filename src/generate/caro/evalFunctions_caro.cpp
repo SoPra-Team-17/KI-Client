@@ -595,8 +595,13 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
     double retVal = 0;
     auto myCharacter = s.getCharacters().findByUUID(characterId);
 
-    spy::util::Point startPoint = start.getCharacters().findByUUID(characterId)->getCoordinates().value();
+    auto startCharacter = start.getCharacters().findByUUID(characterId);
+    spy::util::Point startPoint = startCharacter->getCoordinates().value();
     spy::util::Point endPoint = myCharacter->getCoordinates().value();
+    if (std::find(s.usedGadgets.begin(), s.usedGadgets.end(), spy::gadget::GadgetEnum::JETPACK) != s.usedGadgets.end() &&
+    spy::gameplay::Movement::getMoveDistance(startPoint, endPoint) <= startCharacter->getActionPoints()) {
+        return -std::numeric_limits<double>::infinity(); // not useful to use jetpack for this -> you can move there
+    }
     if (endPoint != startPoint) {
         auto endField = s.getMap().getField(endPoint);
 
