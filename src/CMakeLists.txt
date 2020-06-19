@@ -18,6 +18,33 @@ set(SOURCE
         generate/utils/State_AI.cpp
         generate/utils/generate/OperationGenerator.cpp
         generate/utils/execute/OperationExecutor.cpp
+        generate/utils/execute/OperationExecutor_Movement.cpp
+        generate/utils/execute/OperationExecutor_Retire.cpp
+        generate/utils/execute/OperationExecutor_Gamble.cpp
+        generate/utils/execute/OperationExecutor_Gadget.cpp
+        generate/utils/execute/OperationExecutor_Property.cpp
+        generate/utils/execute/OperationExecutor_Spy.cpp
+        generate/utils/execute/property/OperationExecutor_BangAndBurn.cpp
+        generate/utils/execute/property/OperationExecutor_Observation.cpp
+        generate/utils/execute/gadget/OperationExecutor_BowlerBlade.cpp
+        generate/utils/execute/gadget/OperationExecutor_ChickenFeed.cpp
+        generate/utils/execute/gadget/OperationExecutor_Cocktail.cpp
+        generate/utils/execute/gadget/OperationExecutor_DiamondCollar.cpp
+        generate/utils/execute/gadget/OperationExecutor_FogTin.cpp
+        generate/utils/execute/gadget/OperationExecutor_GasGloss.cpp
+        generate/utils/execute/gadget/OperationExecutor_Grapple.cpp
+        generate/utils/execute/gadget/OperationExecutor_HairDryer.cpp
+        generate/utils/execute/gadget/OperationExecutor_Jetpack.cpp
+        generate/utils/execute/gadget/OperationExecutor_LaserCompact.cpp
+        generate/utils/execute/gadget/OperationExecutor_LaserCompact.cpp
+        generate/utils/execute/gadget/OperationExecutor_MirrorOfWilderness.cpp
+        generate/utils/execute/gadget/OperationExecutor_MoleDie.cpp
+        generate/utils/execute/gadget/OperationExecutor_MothballPouch.cpp
+        generate/utils/execute/gadget/OperationExecutor_Nugget.cpp
+        generate/utils/execute/gadget/OperationExecutor_PoisonPills.cpp
+        generate/utils/execute/gadget/OperationExecutor_RocketPen.cpp
+        generate/utils/execute/gadget/OperationExecutor_TechnicolorPrism.cpp
+        generate/utils/execute/gadget/OperationExecutor_WiretapWithEarplugs.cpp
         )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

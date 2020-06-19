@@ -61,8 +61,6 @@ class AI : public libclient::Callback {
 
         void connect();
         void requestConfigs();
-
-        std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> nextOperations;
 };
 
 

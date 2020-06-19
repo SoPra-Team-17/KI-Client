@@ -11,7 +11,7 @@
 #include "AI.hpp"
 
 constexpr unsigned int maxVerbosity = spdlog::level::level_enum::n_levels;
-constexpr unsigned int maxDifficulty = 1;
+constexpr unsigned int maxDifficulty = 2;
 
 constexpr uint16_t defaultPort = 7007;
 constexpr unsigned int defaultVerbosity = 5;

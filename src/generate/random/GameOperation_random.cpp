@@ -6,9 +6,9 @@
 #include <util/GameLogicUtils.hpp>
 #include <generate/utils/generate/OperationGenerator.hpp>
 
-std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+std::shared_ptr<spy::gameplay::BaseOperation>
 GameOperation_gen::random(const spy::util::UUID &characterId, const spy::gameplay::State &s,
                           const spy::MatchConfig &config) {
     spy::gameplay::State_AI state {s};
-    return {*spy::util::GameLogicUtils::getRandomItemFromContainer(OperationGenerator::generate(state, characterId, config))};
+    return *spy::util::GameLogicUtils::getRandomItemFromContainer(OperationGenerator::generate(state, characterId, config));
 }

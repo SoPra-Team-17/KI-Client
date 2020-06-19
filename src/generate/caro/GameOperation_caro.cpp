@@ -6,21 +6,25 @@
 #include "../GameOperation_gen.hpp"
 #include "evalFunctions_caro.hpp"
 
-std::vector<std::shared_ptr<spy::gameplay::BaseOperation>>
+std::shared_ptr<spy::gameplay::BaseOperation>
 GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay::State &s,
-                        const spy::MatchConfig &config) {
-    spy::gameplay::State_AI state {s};
-    auto endStates = state.getLeafSuccessorStates(characterId, config);
+                        const spy::MatchConfig &config,
+                        const spy::scenario::Scenario &scenarioConfig,
+                        const std::vector<spy::character::CharacterInformation> &characterConfig,
+                        const libclient::LibClient &libClient) {
+    spy::gameplay::State_AI state{s};
+    auto endStates = state.getLeafSuccessorStates(characterId, config, libClient);
 
-    std::vector<std::shared_ptr<spy::gameplay::BaseOperation>> operationsToExecute;
+    std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute;
     double endVal = -std::numeric_limits<double>::infinity();
-    for (const auto &endS: endStates) {
-        double val = evalFunctions_caro::gameOperation(endS, characterId);
+    for (auto &endS: endStates) {
+        double val = evalFunctions_caro::gameOperation(state, endS, characterId, config, scenarioConfig, characterConfig,
+                                                       libClient);
         if (val > endVal) {
             endVal = val;
-            operationsToExecute = endS.operationsLeadingToState;
+            operationToExecute = endS.operationsLeadingToState.at(0);
         }
     }
 
-    return operationsToExecute;
+    return operationToExecute;
 }
