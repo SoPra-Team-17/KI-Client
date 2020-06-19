@@ -16,6 +16,7 @@ set(SOURCE
         generate/caro/GameOperation_caro.cpp
         generate/caro/evalFunctions_caro.cpp
         generate/utils/State_AI.cpp
+        generate/utils/ApproachHelpers.cpp
         generate/utils/generate/OperationGenerator.cpp
         generate/utils/execute/OperationExecutor.cpp
         generate/utils/execute/OperationExecutor_Movement.cpp

@@ -76,10 +76,12 @@ void AI::onRequestItemChoice() {
         requestConfigs();
         return;
     }
+    approachHelper = ApproachHelpers(difficulty, matchConfig.value(),
+                                     scenarioConfig.value(),
+                                     characterConfig.value());
     auto choice = ItemChoice_gen::generate(difficulty, libClientHandler.getOfferedCharacters(),
                                            libClientHandler.getOfferedGadgets(), matchConfig.value(),
-                                           scenarioConfig.value(),
-                                           characterConfig.value());
+                                           characterConfig.value(), approachHelper);
     if (!libClientHandler.network.sendItemChoice(choice)) {
         throw std::runtime_error{"could not send ItemChoice message"};
     }
@@ -91,8 +93,7 @@ void AI::onRequestEquipmentChoice() {
 
     auto equipment = EquipmentChoice_gen::generate(difficulty, libClientHandler.getChosenCharacters(),
                                                    libClientHandler.getChosenGadgets(), matchConfig.value(),
-                                                   scenarioConfig.value(),
-                                                   characterConfig.value());
+                                                   characterConfig.value(), approachHelper);
     if (!libClientHandler.network.sendEquipmentChoice(equipment)) {
         throw std::runtime_error{"could not send EquipmentChoice message"};
     }
@@ -117,8 +118,7 @@ void AI::onRequestGameOperation() {
     auto start = std::chrono::high_resolution_clock::now();
     auto nextOperation = GameOperation_gen::generate(difficulty, libClientHandler.getActiveCharacter(),
                                                      libClientHandler.getState(), matchConfig.value(),
-                                                     scenarioConfig.value(),
-                                                     characterConfig.value(), libClientHandler);
+                                                     characterConfig.value(), libClientHandler, approachHelper);
     auto stop = std::chrono::high_resolution_clock::now();
     auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 

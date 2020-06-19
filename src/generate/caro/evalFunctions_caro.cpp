@@ -6,65 +6,146 @@
 #include <util/GameLogicUtils.hpp>
 #include <datatypes/gadgets/Cocktail.hpp>
 
-double evalFunctions_caro::numMyChar;
-double evalFunctions_caro::numEnemyChar;
-double evalFunctions_caro::numUnknownChar;
-double evalFunctions_caro::gadgetNullopt;
-double evalFunctions_caro::enemyNullopt;
-double evalFunctions_caro::npcNullopt;
 
-bool evalFunctions_caro::staticVarsSet = false;
+evalFunctions_caro::evalFunctions_caro(const spy::MatchConfig &config, const spy::scenario::Scenario &scenarioConfig,
+                                       const std::vector<spy::character::CharacterInformation> &characterConfig) {
+    // scenario
+    maxPlayingFieldDim = scenarioConfig.getNumberOfRows();
+    for (auto y = 0U; y < scenarioConfig.getNumberOfRows(); y++) {
+        for (auto x = 0U; x < scenarioConfig.getRowLength(y); x++) {
 
-double evalFunctions_caro::maxPlayingFieldDim = 0;
-double evalFunctions_caro::numBarTables = 0;
-double evalFunctions_caro::numRouletteTables = 0;
-double evalFunctions_caro::numWalls = 0;
-double evalFunctions_caro::numFree = 0;
-double evalFunctions_caro::numBarSeats = 0;
-double evalFunctions_caro::numSafes = 0;
-double evalFunctions_caro::numFireplaces = 0;
-double evalFunctions_caro::numFields = 0;
-std::vector<spy::util::Point> evalFunctions_caro::safePositions = {};
-std::vector<spy::util::Point> evalFunctions_caro::roulettetablePositions = {};
-std::vector<spy::util::Point> evalFunctions_caro::bartablePositions = {};
+            if (x > maxPlayingFieldDim) {
+                maxPlayingFieldDim = x;
+            }
 
-double evalFunctions_caro::midChipsPerRoulette = 0;
-double evalFunctions_caro::midChance = 0;
-double evalFunctions_caro::midHitChanceWithDamage = 0;
-double evalFunctions_caro::midRangeWithDamage = 0;
-double evalFunctions_caro::midDamage = 0;
+            numFields++;
 
-double evalFunctions_caro::numCharacter = 0;
-double evalFunctions_caro::numNimbleness = 0;
-double evalFunctions_caro::numSluggishness = 0;
-double evalFunctions_caro::numPonderousness = 0;
-double evalFunctions_caro::numSpryness = 0;
-double evalFunctions_caro::numAgility = 0;
-double evalFunctions_caro::numLuckyDevil = 0;
-double evalFunctions_caro::numJinx = 0;
-double evalFunctions_caro::numClammyClothes = 0;
-double evalFunctions_caro::numConstantClammyClothes = 0;
-double evalFunctions_caro::numRobustStomach = 0;
-double evalFunctions_caro::numToughness = 0;
-double evalFunctions_caro::numBabysitter = 0;
-double evalFunctions_caro::numHoneyTrap = 0;
-double evalFunctions_caro::numBangAndBurn = 0;
-double evalFunctions_caro::numFlapsAndSeals = 0;
-double evalFunctions_caro::numTradecraft = 0;
-double evalFunctions_caro::numObservation = 0;
+            switch (scenarioConfig.getField(x, y)) {
+                case spy::scenario::FieldStateEnum::BAR_TABLE:
+                    bartablePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
+                    numBarTables++;
+                    break;
+                case spy::scenario::FieldStateEnum::ROULETTE_TABLE:
+                    roulettetablePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
+                    numRouletteTables++;
+                    break;
+                case spy::scenario::FieldStateEnum::WALL:
+                    numWalls++;
+                    break;
+                case spy::scenario::FieldStateEnum::FREE:
+                    numFree++;
+                    break;
+                case spy::scenario::FieldStateEnum::BAR_SEAT:
+                    numBarSeats++;
+                    break;
+                case spy::scenario::FieldStateEnum::SAFE:
+                    safePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
+                    numSafes++;
+                    break;
+                case spy::scenario::FieldStateEnum::FIREPLACE:
+                    numFireplaces++;
+                    break;
+                default:
+                    break;
+            }
 
-double evalFunctions_caro::maxChipsInCasino = 0;
-double evalFunctions_caro::maxIpInCasino = 0;
-double evalFunctions_caro::chipsToIpJudge = 0;
-double evalFunctions_caro::secretsToIpJudge = 0;
-
-double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
-                                      const spy::MatchConfig &config, const spy::scenario::Scenario &scenarioConfig,
-                                      const std::vector<spy::character::CharacterInformation> &characterConfig) {
-    if (!staticVarsSet) {
-        setStaticVars(scenarioConfig, config, characterConfig);
+        }
     }
 
+    // match
+    midChipsPerRoulette = config.getMinChipsRoulette() + config.getMaxChipsRoulette();
+    midChipsPerRoulette /= 2.0;
+
+    midChance = config.getGrappleHitChance() + config.getSpySuccessChance() + config.getMirrorSwapChance() +
+                config.getBowlerBladeHitChance() + config.getLaserCompactHitChance() + config.getCocktailDodgeChance();
+    midChance /= 6.0;
+
+    midHitChanceWithDamage = config.getBowlerBladeHitChance() + config.getLaserCompactHitChance();
+    midHitChanceWithDamage /= 2.0;
+
+    midRangeWithDamage = config.getMoledieRange() + config.getBowlerBladeRange() + config.getMothballPouchRange();
+    midRangeWithDamage /= (3.0 * maxPlayingFieldDim);
+    midRangeWithDamage = std::min(1.0, midRangeWithDamage);
+
+    midDamage = config.getGasGlossDamage() + config.getBowlerBladeDamage() + config.getMothballPouchDamage() +
+                config.getRocketPenDamage();
+    midDamage /= (4.0 * 100.0);
+    midDamage = std::min(1.0, midDamage);
+
+    // character
+    for (const auto &info: characterConfig) {
+        numCharacter++;
+        for (const auto &p: info.getFeatures()) {
+            switch (p) {
+                case spy::character::PropertyEnum::NIMBLENESS:
+                    numNimbleness++;
+                    break;
+                case spy::character::PropertyEnum::SLUGGISHNESS:
+                    numSluggishness++;
+                    break;
+                case spy::character::PropertyEnum::PONDEROUSNESS:
+                    numPonderousness++;
+                    break;
+                case spy::character::PropertyEnum::SPRYNESS:
+                    numSpryness++;
+                    break;
+                case spy::character::PropertyEnum::AGILITY:
+                    numAgility++;
+                    break;
+                case spy::character::PropertyEnum::LUCKY_DEVIL:
+                    numLuckyDevil++;
+                    break;
+                case spy::character::PropertyEnum::JINX:
+                    numJinx++;
+                    break;
+                case spy::character::PropertyEnum::CLAMMY_CLOTHES:
+                    numClammyClothes++;
+                    break;
+                case spy::character::PropertyEnum::CONSTANT_CLAMMY_CLOTHES:
+                    numConstantClammyClothes++;
+                    break;
+                case spy::character::PropertyEnum::ROBUST_STOMACH:
+                    numRobustStomach++;
+                    break;
+                case spy::character::PropertyEnum::TOUGHNESS:
+                    numToughness++;
+                    break;
+                case spy::character::PropertyEnum::BABYSITTER:
+                    numBabysitter++;
+                    break;
+                case spy::character::PropertyEnum::HONEY_TRAP:
+                    numHoneyTrap++;
+                    break;
+                case spy::character::PropertyEnum::BANG_AND_BURN:
+                    numBangAndBurn++;
+                    break;
+                case spy::character::PropertyEnum::FLAPS_AND_SEALS:
+                    numFlapsAndSeals++;
+                    break;
+                case spy::character::PropertyEnum::TRADECRAFT:
+                    numTradecraft++;
+                    break;
+                case spy::character::PropertyEnum::OBSERVATION:
+                    numObservation++;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    // mixed
+    maxChipsInCasino = config.getMaxChipsRoulette() * numRouletteTables;
+    maxIpInCasino = (numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) +
+                    maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor());
+    chipsToIpJudge = maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor()) / maxIpInCasino;
+    secretsToIpJudge =
+            (numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) / maxIpInCasino;
+}
+
+double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
+                                      const spy::MatchConfig &config,
+                                      const std::vector<spy::character::CharacterInformation> &characterConfig) const {
     double ret = 0;
 
     if (std::holds_alternative<const spy::util::UUID>(offer)) {
@@ -243,8 +324,7 @@ double evalFunctions_caro::itemChoice(const std::variant<const spy::util::UUID, 
 spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util::UUID> &chosenCharacterIds,
                                                     spy::gadget::GadgetEnum chosenGadgetType,
                                                     const spy::MatchConfig &config,
-                                                    const spy::scenario::Scenario &scenarioConfig,
-                                                    const std::vector<spy::character::CharacterInformation> &characterConfig) {
+                                                    const std::vector<spy::character::CharacterInformation> &characterConfig) const {
 
     std::set<spy::character::PropertyEnum> posProps = {spy::character::PropertyEnum::SPRYNESS};
     std::set<spy::character::PropertyEnum> negProps;
@@ -320,7 +400,7 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
             spy::util::UUID character;
             double characterVal = -std::numeric_limits<double>::infinity();
             for (const auto &charId: chosenCharacterIds) {
-                double val = itemChoice(charId, config, scenarioConfig, characterConfig);
+                double val = itemChoice(charId, config, characterConfig);
                 if (val > characterVal) {
                     characterVal = val;
                     character = charId;
@@ -379,7 +459,6 @@ spy::util::UUID evalFunctions_caro::equipmentChoice(const std::vector<spy::util:
 double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, spy::gameplay::State_AI &s,
                                          const spy::util::UUID &characterId,
                                          const spy::MatchConfig &config,
-                                         const spy::scenario::Scenario &scenarioConfig,
                                          const std::vector<spy::character::CharacterInformation> &characterConfig,
                                          const libclient::LibClient &libClient) {
     double retVal = 0;
@@ -402,7 +481,7 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
         auto g = std::find(used.begin(), used.end(), gad);
         if (g != used.end()) {
             used.erase(g);
-            retVal += itemChoice(gad, config, scenarioConfig, characterConfig);
+            retVal += itemChoice(gad, config, characterConfig);
             if (gad == spy::gadget::GadgetEnum::DIAMOND_COLLAR) {
                 retVal += config.getCatIp() / maxIpInCasino * winningReason;
             } else if (gad == spy::gadget::GadgetEnum::COCKTAIL) {
@@ -689,8 +768,8 @@ double evalFunctions_caro::evalUsedProperties(const spy::gameplay::State_AI &s,
 }
 
 double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
-                                         const spy::MatchConfig &config,
-                                         const libclient::LibClient &libClient) {
+                                           const spy::MatchConfig &config,
+                                           const libclient::LibClient &libClient) {
     double retVal = 0;
 
     for (const auto &usedG: s.usedGadgets) {
@@ -871,142 +950,4 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
     }
 
     return retVal;
-}
-
-void evalFunctions_caro::setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,
-                                       const std::vector<spy::character::CharacterInformation> &characterConfig) {
-    // scenario
-    maxPlayingFieldDim = scenarioConfig.getNumberOfRows();
-    for (auto y = 0U; y < scenarioConfig.getNumberOfRows(); y++) {
-        for (auto x = 0U; x < scenarioConfig.getRowLength(y); x++) {
-
-            if (x > maxPlayingFieldDim) {
-                maxPlayingFieldDim = x;
-            }
-
-            numFields++;
-
-            switch (scenarioConfig.getField(x, y)) {
-                case spy::scenario::FieldStateEnum::BAR_TABLE:
-                    bartablePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
-                    numBarTables++;
-                    break;
-                case spy::scenario::FieldStateEnum::ROULETTE_TABLE:
-                    roulettetablePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
-                    numRouletteTables++;
-                    break;
-                case spy::scenario::FieldStateEnum::WALL:
-                    numWalls++;
-                    break;
-                case spy::scenario::FieldStateEnum::FREE:
-                    numFree++;
-                    break;
-                case spy::scenario::FieldStateEnum::BAR_SEAT:
-                    numBarSeats++;
-                    break;
-                case spy::scenario::FieldStateEnum::SAFE:
-                    safePositions.push_back({static_cast<int>(x), static_cast<int>(y)});
-                    numSafes++;
-                    break;
-                case spy::scenario::FieldStateEnum::FIREPLACE:
-                    numFireplaces++;
-                    break;
-                default:
-                    break;
-            }
-
-        }
-    }
-
-    // match
-    midChipsPerRoulette = config.getMinChipsRoulette() + config.getMaxChipsRoulette();
-    midChipsPerRoulette /= 2.0;
-
-    midChance = config.getGrappleHitChance() + config.getSpySuccessChance() + config.getMirrorSwapChance() +
-                config.getBowlerBladeHitChance() + config.getLaserCompactHitChance() + config.getCocktailDodgeChance();
-    midChance /= 6.0;
-
-    midHitChanceWithDamage = config.getBowlerBladeHitChance() + config.getLaserCompactHitChance();
-    midHitChanceWithDamage /= 2.0;
-
-    midRangeWithDamage = config.getMoledieRange() + config.getBowlerBladeRange() + config.getMothballPouchRange();
-    midRangeWithDamage /= (3.0 * maxPlayingFieldDim);
-    midRangeWithDamage = std::min(1.0, midRangeWithDamage);
-
-    midDamage = config.getGasGlossDamage() + config.getBowlerBladeDamage() + config.getMothballPouchDamage() +
-                config.getRocketPenDamage();
-    midDamage /= (4.0 * 100.0);
-    midDamage = std::min(1.0, midDamage);
-
-    // character
-    for (const auto &info: characterConfig) {
-        numCharacter++;
-        for (const auto &p: info.getFeatures()) {
-            switch (p) {
-                case spy::character::PropertyEnum::NIMBLENESS:
-                    numNimbleness++;
-                    break;
-                case spy::character::PropertyEnum::SLUGGISHNESS:
-                    numSluggishness++;
-                    break;
-                case spy::character::PropertyEnum::PONDEROUSNESS:
-                    numPonderousness++;
-                    break;
-                case spy::character::PropertyEnum::SPRYNESS:
-                    numSpryness++;
-                    break;
-                case spy::character::PropertyEnum::AGILITY:
-                    numAgility++;
-                    break;
-                case spy::character::PropertyEnum::LUCKY_DEVIL:
-                    numLuckyDevil++;
-                    break;
-                case spy::character::PropertyEnum::JINX:
-                    numJinx++;
-                    break;
-                case spy::character::PropertyEnum::CLAMMY_CLOTHES:
-                    numClammyClothes++;
-                    break;
-                case spy::character::PropertyEnum::CONSTANT_CLAMMY_CLOTHES:
-                    numConstantClammyClothes++;
-                    break;
-                case spy::character::PropertyEnum::ROBUST_STOMACH:
-                    numRobustStomach++;
-                    break;
-                case spy::character::PropertyEnum::TOUGHNESS:
-                    numToughness++;
-                    break;
-                case spy::character::PropertyEnum::BABYSITTER:
-                    numBabysitter++;
-                    break;
-                case spy::character::PropertyEnum::HONEY_TRAP:
-                    numHoneyTrap++;
-                    break;
-                case spy::character::PropertyEnum::BANG_AND_BURN:
-                    numBangAndBurn++;
-                    break;
-                case spy::character::PropertyEnum::FLAPS_AND_SEALS:
-                    numFlapsAndSeals++;
-                    break;
-                case spy::character::PropertyEnum::TRADECRAFT:
-                    numTradecraft++;
-                    break;
-                case spy::character::PropertyEnum::OBSERVATION:
-                    numObservation++;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    // mixed
-    maxChipsInCasino = config.getMaxChipsRoulette() * numRouletteTables;
-    maxIpInCasino = (numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) +
-                    maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor());
-    chipsToIpJudge = maxChipsInCasino * static_cast<double>(config.getChipsToIpFactor()) / maxIpInCasino;
-    secretsToIpJudge =
-            (numSafes + numCharacter - 4) * static_cast<double>(config.getSecretToIpFactor()) / maxIpInCasino;
-
-    staticVarsSet = true;
 }

@@ -7,6 +7,7 @@
 
 #include <spdlog/spdlog.h>
 #include <LibClient.hpp>
+#include <generate/utils/ApproachHelpers.hpp>
 
 
 class AI : public libclient::Callback {
@@ -53,6 +54,7 @@ class AI : public libclient::Callback {
         bool delay;
 
         libclient::LibClient libClientHandler;
+        ApproachHelpers approachHelper;
         std::optional<spy::MatchConfig> matchConfig;
         std::optional<spy::scenario::Scenario> scenarioConfig;
         std::optional<std::vector<spy::character::CharacterInformation>> characterConfig;
