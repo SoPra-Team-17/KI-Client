@@ -464,6 +464,14 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
     double retVal = 0;
     double val = 0;
 
+    auto startCharacter = start.getCharacters().findByUUID(characterId);
+    if (startCharacter->hasGadget(spy::gadget::GadgetEnum::MOLEDIE) &&
+        startCharacter->getActionPoints() > 0 &&
+        std::find(s.usedGadgets.begin(), s.usedGadgets.end(), spy::gadget::GadgetEnum::MOLEDIE) ==
+        s.usedGadgets.end()) {
+        return -std::numeric_limits<double>::infinity(); // tarn as npc
+    }
+
     numMyChar = static_cast<double>(libClient.getMyFactionList().size());
     numEnemyChar = static_cast<double>(libClient.getEnemyFactionList().size());
     numUnknownChar = static_cast<double>(libClient.getUnknownFactionList().size());
@@ -598,8 +606,9 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
     auto startCharacter = start.getCharacters().findByUUID(characterId);
     spy::util::Point startPoint = startCharacter->getCoordinates().value();
     spy::util::Point endPoint = myCharacter->getCoordinates().value();
-    if (std::find(s.usedGadgets.begin(), s.usedGadgets.end(), spy::gadget::GadgetEnum::JETPACK) != s.usedGadgets.end() &&
-    spy::gameplay::Movement::getMoveDistance(startPoint, endPoint) <= startCharacter->getActionPoints()) {
+    if (std::find(s.usedGadgets.begin(), s.usedGadgets.end(), spy::gadget::GadgetEnum::JETPACK) !=
+        s.usedGadgets.end() &&
+        spy::gameplay::Movement::getMoveDistance(startPoint, endPoint) <= startCharacter->getActionPoints()) {
         return -std::numeric_limits<double>::infinity(); // not useful to use jetpack for this -> you can move there
     }
     if (endPoint != startPoint) {
