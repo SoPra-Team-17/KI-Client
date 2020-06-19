@@ -18,8 +18,7 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
 
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
-    delay = additionalOptions.find("delay") != additionalOptions.end() ? static_cast<bool>(std::stoi(
-            additionalOptions.at("delay"))) : true;
+    delay = additionalOptions.find("nodelay") != additionalOptions.end() ? false : true;
 
     // set up logging
     Logging::initLogging(verbosity);

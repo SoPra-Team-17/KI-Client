@@ -49,6 +49,11 @@ int main(int argc, char *argv[]) {
     verbosity = verbosity == 0 ? maxVerbosity : verbosity;
 
     // arrange key value pairs in a map
+    auto delayflag = std::find(keyValueStrings.begin(), keyValueStrings.end(), "nodelay");
+    if (delayflag != keyValueStrings.end()) {
+        keyValueStrings.erase(delayflag);
+        additionalOptions["nodelay"];
+    }
     for (unsigned int i = 0; i + 1 < keyValueStrings.size(); i += 2) {
         additionalOptions[keyValueStrings.at(i)] = keyValueStrings.at(i + 1);
     }
