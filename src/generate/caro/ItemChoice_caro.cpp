@@ -8,15 +8,15 @@
 std::variant<spy::util::UUID, spy::gadget::GadgetEnum>
 ItemChoice_gen::caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
                      const std::vector<spy::gadget::GadgetEnum> &offeredGadgets, const spy::MatchConfig &config,
-                     const spy::scenario::Scenario &scenarioConfig,
-                     const std::vector<spy::character::CharacterInformation> &characterConfig) {
+                     const std::vector<spy::character::CharacterInformation> &characterConfig,
+                     const ApproachHelpers &approachHelper) {
     double shift = 0;
 
     double midCharacterVal = 0;
     spy::util::UUID character;
     double characterVal = -std::numeric_limits<double>::infinity();
     for (const auto &id: offeredCharacterIds) {
-        double val = evalFunctions_caro::itemChoice(id, config, scenarioConfig, characterConfig);
+        double val = approachHelper.evalFun_caro.value().itemChoice(id, config, characterConfig);
         midCharacterVal += val;
         if (val < shift) {
             shift = val;
@@ -31,7 +31,7 @@ ItemChoice_gen::caro(const std::vector<spy::util::UUID> &offeredCharacterIds,
     spy::gadget::GadgetEnum gadget;
     double gadgetVal = -std::numeric_limits<double>::infinity();
     for (const auto &type: offeredGadgets) {
-        double val = evalFunctions_caro::itemChoice(type, config, scenarioConfig, characterConfig);
+        double val = approachHelper.evalFun_caro.value().itemChoice(type, config, characterConfig);
         midGadgetVal += val;
         if (val < shift) {
             shift = val;

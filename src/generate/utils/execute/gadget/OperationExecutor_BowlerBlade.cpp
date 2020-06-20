@@ -17,6 +17,9 @@ OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, cons
     spy::gameplay::State_AI sSuccess = state;
 
     auto character = sSuccess.getCharacters().getByUUID(op.getCharacterId());
+    if (character->getCoordinates().value() == op.getTarget()) {
+        return {}; // do not use bowler blade against yourself
+    }
     character->removeGadget(op.getGadget());
 
     sSuccess.modStateChance(*character, config.getBowlerBladeHitChance());

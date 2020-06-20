@@ -9,6 +9,7 @@
 #include <datatypes/gameplay/State.hpp>
 #include <datatypes/matchconfig/MatchConfig.hpp>
 #include <LibClient.hpp>
+#include <generate/utils/ApproachHelpers.hpp>
 
 class GameOperation_gen {
     public:
@@ -17,9 +18,8 @@ class GameOperation_gen {
         static std::shared_ptr<spy::gameplay::BaseOperation>
         generate(unsigned int difficulty, const spy::util::UUID &characterId, const spy::gameplay::State &s,
                  const spy::MatchConfig &config,
-                 const spy::scenario::Scenario &scenarioConfig,
                  const std::vector<spy::character::CharacterInformation> &characterConfig,
-                 const libclient::LibClient &libClient);
+                 const libclient::LibClient &libClient, ApproachHelpers &approachHelper);
 
     private:
         static std::shared_ptr<spy::gameplay::BaseOperation>
@@ -27,9 +27,8 @@ class GameOperation_gen {
 
         static std::shared_ptr<spy::gameplay::BaseOperation>
         caro(const spy::util::UUID &characterId, const spy::gameplay::State &s, const spy::MatchConfig &config,
-             const spy::scenario::Scenario &scenarioConfig,
              const std::vector<spy::character::CharacterInformation> &characterConfig,
-             const libclient::LibClient &libClient);
+             const libclient::LibClient &libClient, ApproachHelpers &approachHelper);
 };
 
 #endif //KICLIENT_GAMEOPERATION_GEN_HPP

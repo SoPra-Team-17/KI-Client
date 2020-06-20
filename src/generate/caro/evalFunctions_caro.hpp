@@ -16,7 +16,8 @@
 
 class evalFunctions_caro {
     public:
-        evalFunctions_caro() = delete;
+        evalFunctions_caro(const spy::MatchConfig &config, const spy::scenario::Scenario &scenarioConfig,
+                           const std::vector<spy::character::CharacterInformation> &characterConfig);
 
         /**
          * evaluates item choice
@@ -26,10 +27,9 @@ class evalFunctions_caro {
          * @param characterConfig current character information
          * @return double indicating how good offer is (the higher the value the better)
          */
-        static double itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
-                                 const spy::MatchConfig &config,
-                                 const spy::scenario::Scenario &scenarioConfig,
-                                 const std::vector<spy::character::CharacterInformation> &characterConfig);
+        [[nodiscard]] double itemChoice(const std::variant<const spy::util::UUID, const spy::gadget::GadgetEnum> &offer,
+                                        const spy::MatchConfig &config,
+                                        const std::vector<spy::character::CharacterInformation> &characterConfig) const;
 
         /**
          * evaluates which character should get gadget in equipment choice
@@ -40,10 +40,10 @@ class evalFunctions_caro {
          * @param characterConfig current character information
          * @return character that should get gadget
          */
-        static spy::util::UUID equipmentChoice(const std::vector<spy::util::UUID> &chosenCharacterIds,
-                                               spy::gadget::GadgetEnum chosenGadgetType, const spy::MatchConfig &config,
-                                               const spy::scenario::Scenario &scenarioConfig,
-                                               const std::vector<spy::character::CharacterInformation> &characterConfig);
+        [[nodiscard]] spy::util::UUID equipmentChoice(const std::vector<spy::util::UUID> &chosenCharacterIds,
+                                                      spy::gadget::GadgetEnum chosenGadgetType,
+                                                      const spy::MatchConfig &config,
+                                                      const std::vector<spy::character::CharacterInformation> &characterConfig) const;
 
         /**
          * evaluates state that results after character took its actions
@@ -56,9 +56,9 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double indicating how good resulting state is (the higher the value the better)
          */
-        static double
-        gameOperation(const spy::gameplay::State_AI &start, spy::gameplay::State_AI &s, const spy::util::UUID &characterId, const spy::MatchConfig &config,
-                      const spy::scenario::Scenario &scenarioConfig,
+        [[nodiscard]] double
+        gameOperation(const spy::gameplay::State_AI &start, spy::gameplay::State_AI &s,
+                      const spy::util::UUID &characterId, const spy::MatchConfig &config,
                       const std::vector<spy::character::CharacterInformation> &characterConfig,
                       const libclient::LibClient &libClient);
 
@@ -69,7 +69,7 @@ class evalFunctions_caro {
          * these nullopts are replaced by values here, as we have got the necessary information here
          * @param s State_AI to processed
          */
-        static void modifyNulloptsInState(spy::gameplay::State_AI &s);
+        void modifyNulloptsInState(spy::gameplay::State_AI &s);
 
         /**
          * helper for gameOperation method
@@ -81,10 +81,10 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double value to be added to return value of gameOperation
          */
-        static double evalPosition(const spy::gameplay::State_AI &start, const spy::gameplay::State_AI &s,
-                                   const spy::util::UUID &characterId,
-                                   const spy::MatchConfig &config,
-                                   const libclient::LibClient &libClient);
+        double evalPosition(const spy::gameplay::State_AI &start, const spy::gameplay::State_AI &s,
+                            const spy::util::UUID &characterId,
+                            const spy::MatchConfig &config,
+                            const libclient::LibClient &libClient);
 
         /**
          * helper for gameOperation method
@@ -94,9 +94,9 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double value to be added to return value of gameOperation
          */
-        static double evalHp(const spy::gameplay::State_AI &s,
-                             const spy::util::UUID &characterId,
-                             const libclient::LibClient &libClient);
+        double evalHp(const spy::gameplay::State_AI &s,
+                      const spy::util::UUID &characterId,
+                      const libclient::LibClient &libClient);
 
         /**
          * helper for gameOperation method
@@ -106,9 +106,9 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double value to be added to return value of gameOperation
          */
-        static double evalUsedGadgets(const spy::gameplay::State_AI &s,
-                                      const spy::MatchConfig &config,
-                                      const libclient::LibClient &libClient);
+        double evalUsedGadgets(const spy::gameplay::State_AI &s,
+                               const spy::MatchConfig &config,
+                               const libclient::LibClient &libClient);
 
         /**
          * helper for gameOperation method
@@ -117,8 +117,8 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double value to be added to return value of gameOperation
          */
-        static double evalUsedProperties(const spy::gameplay::State_AI &s,
-                                         const libclient::LibClient &libClient);
+        double evalUsedProperties(const spy::gameplay::State_AI &s,
+                                  const libclient::LibClient &libClient);
 
         /**
          * helper for gameOperation method
@@ -127,68 +127,62 @@ class evalFunctions_caro {
          * @param libClient up to date libClient object for AIState information
          * @return double value to be added to return value of gameOperation
          */
-        static double evalSpy(const spy::gameplay::State_AI &s,
-                              const libclient::LibClient &libClient);
+        double evalSpy(const spy::gameplay::State_AI &s,
+                       const libclient::LibClient &libClient);
 
         static constexpr double maxHealthPoints = 100.0;
         static constexpr double winningReason = 10;
         static constexpr double unsureLimit = 0.5;
 
-        static double numMyChar;
-        static double numEnemyChar;
-        static double numUnknownChar;
-        static double gadgetNullopt;
-        static double enemyNullopt;
-        static double npcNullopt;
+        double numMyChar;
+        double numEnemyChar;
+        double numUnknownChar;
+        double gadgetNullopt;
+        double enemyNullopt;
+        double npcNullopt;
 
+        double maxPlayingFieldDim;
+        double numBarTables;
+        double numRouletteTables;
+        double numWalls;
+        double numFree;
+        double numBarSeats;
+        double numSafes;
+        double numFireplaces;
+        double numFields;
+        std::vector<spy::util::Point> safePositions;
+        std::vector<spy::util::Point> roulettetablePositions;
+        std::vector<spy::util::Point> bartablePositions;
 
-        static void setStaticVars(const spy::scenario::Scenario &scenarioConfig, const spy::MatchConfig &config,
-                                  const std::vector<spy::character::CharacterInformation> &characterConfig);
+        double midChipsPerRoulette;
+        double midChance;
+        double midHitChanceWithDamage;
+        double midRangeWithDamage;
+        double midDamage;
 
-        static bool staticVarsSet;
+        double numCharacter;
+        double numNimbleness;
+        double numSluggishness;
+        double numPonderousness;
+        double numSpryness;
+        double numAgility;
+        double numLuckyDevil;
+        double numJinx;
+        double numClammyClothes;
+        double numConstantClammyClothes;
+        double numRobustStomach;
+        double numToughness;
+        double numBabysitter;
+        double numHoneyTrap;
+        double numBangAndBurn;
+        double numFlapsAndSeals;
+        double numTradecraft;
+        double numObservation;
 
-        static double maxPlayingFieldDim;
-        static double numBarTables;
-        static double numRouletteTables;
-        static double numWalls;
-        static double numFree;
-        static double numBarSeats;
-        static double numSafes;
-        static double numFireplaces;
-        static double numFields;
-        static std::vector<spy::util::Point> safePositions;
-        static std::vector<spy::util::Point> roulettetablePositions;
-        static std::vector<spy::util::Point> bartablePositions;
-
-        static double midChipsPerRoulette;
-        static double midChance;
-        static double midHitChanceWithDamage;
-        static double midRangeWithDamage;
-        static double midDamage;
-
-        static double numCharacter;
-        static double numNimbleness;
-        static double numSluggishness;
-        static double numPonderousness;
-        static double numSpryness;
-        static double numAgility;
-        static double numLuckyDevil;
-        static double numJinx;
-        static double numClammyClothes;
-        static double numConstantClammyClothes;
-        static double numRobustStomach;
-        static double numToughness;
-        static double numBabysitter;
-        static double numHoneyTrap;
-        static double numBangAndBurn;
-        static double numFlapsAndSeals;
-        static double numTradecraft;
-        static double numObservation;
-
-        static double maxChipsInCasino;
-        static double maxIpInCasino;
-        static double chipsToIpJudge;
-        static double secretsToIpJudge;
+        double maxChipsInCasino;
+        double maxIpInCasino;
+        double chipsToIpJudge;
+        double secretsToIpJudge;
 };
 
 
