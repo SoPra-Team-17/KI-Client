@@ -9,7 +9,8 @@ OperationExecutor::executeJetpack(const spy::gameplay::State_AI &state, const sp
     spy::gameplay::State_AI s = state;
 
     auto character = s.getCharacters().getByUUID(op.getCharacterId());
-    if (spy::gameplay::Movement::getMoveDistance(character->getCoordinates().value(), op.getTarget()) <= 1) {
+    if (spy::gameplay::Movement::getMoveDistance(character->getCoordinates().value(), op.getTarget()) <=
+        character->getMovePoints()) {
         return {}; // you can move there
     }
     character->setCoordinates(op.getTarget());

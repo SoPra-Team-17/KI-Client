@@ -8,9 +8,9 @@
 
 
 evalFunctions_caro::evalFunctions_caro(const spy::MatchConfig &config, const spy::scenario::Scenario &scenarioConfig,
-                                       const std::vector<spy::character::CharacterInformation> &characterConfig) {
+                                       const std::vector<spy::character::CharacterInformation> &characterConfig)
+        : maxPlayingFieldDim(scenarioConfig.getNumberOfRows()) {
     // scenario
-    maxPlayingFieldDim = scenarioConfig.getNumberOfRows();
     for (auto y = 0U; y < scenarioConfig.getNumberOfRows(); y++) {
         for (auto x = 0U; x < scenarioConfig.getRowLength(y); x++) {
 
@@ -608,7 +608,7 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
     spy::util::Point endPoint = myCharacter->getCoordinates().value();
     if (std::find(s.usedGadgets.begin(), s.usedGadgets.end(), spy::gadget::GadgetEnum::JETPACK) !=
         s.usedGadgets.end() &&
-        spy::gameplay::Movement::getMoveDistance(startPoint, endPoint) <= startCharacter->getActionPoints()) {
+        spy::gameplay::Movement::getMoveDistance(startPoint, endPoint) <= startCharacter->getMovePoints()) {
         return -std::numeric_limits<double>::infinity(); // not useful to use jetpack for this -> you can move there
     }
     if (endPoint != startPoint) {
