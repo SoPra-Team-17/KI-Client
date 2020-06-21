@@ -615,6 +615,7 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
         return -std::numeric_limits<double>::infinity(); // not useful to use jetpack for this -> you can move there
     }
     if (endPoint != startPoint) {
+        retVal += std::numeric_limits<double>::epsilon(); // to not take retire if move is possible
         auto endField = s.getMap().getField(endPoint);
 
         const auto &openedSafes = libClient.getOpenedSafes();

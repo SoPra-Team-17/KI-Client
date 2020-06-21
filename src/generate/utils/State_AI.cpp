@@ -10,10 +10,10 @@
 
 namespace spy::gameplay {
 
-    std::vector<State_AI> State_AI::getSuccessorStates(const util::UUID &characterId,
+    void State_AI::getSuccessorStates(const util::UUID &characterId,
                                                        const spy::MatchConfig &config,
-                                                       const libclient::LibClient &libClient) {
-        std::vector<State_AI> successors;
+                                                       const libclient::LibClient &libClient,
+                                                       std::vector<State_AI> &successors) {
         this->wasHoneyTrapUsed = false;
         auto operations = OperationGenerator::generate(*this, characterId, config);
 
@@ -21,8 +21,6 @@ namespace spy::gameplay {
             auto successorStates = OperationExecutor::execute(*this, op, config, libClient);
             successors.insert(successors.end(), successorStates.begin(), successorStates.end());
         }
-
-        return successors;
     }
 
     std::vector<State_AI>
@@ -35,25 +33,11 @@ namespace spy::gameplay {
             // get successors of states in successors list
             std::vector<State_AI> newSuccessors;
             for (auto &suc: successors) {
-                auto sucBuf = suc.getSuccessorStates(characterId, config, libClient);
-                newSuccessors.insert(newSuccessors.end(), sucBuf.begin(), sucBuf.end());
+                suc.getSuccessorStates(characterId, config, libClient, newSuccessors);
             }
 
             // erase processed states in successors list and add newSuccessors to the correct list if they are no duplicate
             successors.clear();
-
-            auto isDuplicate = [](const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId) {
-                auto it = std::find_if(list.begin(), list.end(), [&state, &charId](const State_AI &s) {
-                    if (s == state) {
-                        auto charS = s.getCharacters().findByUUID(charId)->getCoordinates().value();
-                        auto charState = state.getCharacters().findByUUID(charId)->getCoordinates().value();
-                        return charS == charState;
-                    }
-                    return false;
-                });
-                return it != list.end();
-            };
-
             for (const auto &newSuc: newSuccessors) {
                 if (newSuc.isLeafState) {
                     if (!isDuplicate(leafSuccessors, newSuc, characterId)) {
@@ -212,6 +196,18 @@ namespace spy::gameplay {
         }
 
         return false;
+    }
+
+    bool State_AI::isDuplicate(const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId) {
+        auto it = std::find_if(list.begin(), list.end(), [&state, &charId](const State_AI &s) {
+            if (s == state) {
+                auto charS = s.getCharacters().findByUUID(charId)->getCoordinates().value();
+                auto charState = state.getCharacters().findByUUID(charId)->getCoordinates().value();
+                return charS == charState;
+            }
+            return false;
+        });
+        return it != list.end();
     }
 
 }

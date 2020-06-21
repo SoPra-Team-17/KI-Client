@@ -90,14 +90,17 @@ namespace spy::gameplay {
             bool handleBabysitter(const GadgetAction &op, const MatchConfig &config);
 
         private:
-            [[nodiscard]] std::vector<State_AI> getSuccessorStates(const spy::util::UUID &characterId,
-                                                                   const spy::MatchConfig &config,
-                                                                   const libclient::LibClient &libClient);
+            void getSuccessorStates(const spy::util::UUID &characterId,
+                                    const spy::MatchConfig &config,
+                                    const libclient::LibClient &libClient,
+                                    std::vector<State_AI> &successors);
 
             [[nodiscard]] std::vector<GadgetAction>
             getHoneyTrapAlternatives(GadgetAction a, const MatchConfig &config) const;
 
             bool operator==(const State_AI &rhs) const;
+
+            static bool isDuplicate(const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId);
     };
 }
 

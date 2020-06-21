@@ -50,11 +50,14 @@ auto OperationGenerator::generate(const spy::gameplay::State &s, const spy::util
             // gamble: only valid in dist = 1
             GambleAction gambleTest{false, p, characterId, 0};
             if (ActionValidator::validateGambleAction(s, gambleTest)) {
-                // try out different stakes as gambling is possible on that point in general
-                for (auto stake = 1U; stake <= character->getChips(); stake++) {
-                    GambleAction gamble{false, p, characterId, stake};
-                    if (ActionValidator::validateGambleAction(s, gamble)) {
-                        retOps.push_back(std::make_shared<GambleAction>(gamble));
+                // caro approach will always take gamble with most chips sets
+                GambleAction gambleAllIn{false, p, characterId, character->getChips()};
+                if (ActionValidator::validateGambleAction(s, gambleAllIn)) {
+                    retOps.push_back(std::make_shared<GambleAction>(gambleAllIn));
+                } else {
+                    GambleAction gambleMax{false, p, characterId, s.getMap().getField(p).getChipAmount().value()};
+                    if (ActionValidator::validateGambleAction(s, gambleMax)) {
+                        retOps.push_back(std::make_shared<GambleAction>(gambleMax));
                     }
                 }
             }
