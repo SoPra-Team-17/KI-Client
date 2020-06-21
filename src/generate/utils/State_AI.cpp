@@ -7,13 +7,14 @@
 #include "State_AI.hpp"
 #include "generate/OperationGenerator.hpp"
 #include "execute/OperationExecutor.hpp"
+#include <spdlog/spdlog.h>
 
 namespace spy::gameplay {
 
     void State_AI::getSuccessorStates(const util::UUID &characterId,
-                                                       const spy::MatchConfig &config,
-                                                       const libclient::LibClient &libClient,
-                                                       std::vector<State_AI> &successors) {
+                                      const spy::MatchConfig &config,
+                                      const libclient::LibClient &libClient,
+                                      std::vector<State_AI> &successors) {
         this->wasHoneyTrapUsed = false;
         auto operations = OperationGenerator::generate(*this, characterId, config);
 
@@ -25,19 +26,33 @@ namespace spy::gameplay {
 
     std::vector<State_AI>
     State_AI::getLeafSuccessorStates(const util::UUID &characterId,
-                                     const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+                                     const spy::MatchConfig &config, const libclient::LibClient &libClient,
+                                     unsigned int maxDur) {
+        auto endClock = std::chrono::system_clock::now() + std::chrono::milliseconds(maxDur);
+
         std::vector<State_AI> leafSuccessors;
         std::vector<State_AI> successors = {*this};
 
         while (!successors.empty()) {
             // get successors of states in successors list
             std::vector<State_AI> newSuccessors;
-            for (auto &suc: successors) {
-                suc.getSuccessorStates(characterId, config, libClient, newSuccessors);
+            auto suc = successors.back();
+            suc.getSuccessorStates(characterId, config, libClient, newSuccessors);
+            successors.pop_back();
+
+            // early return
+            if (std::chrono::system_clock::now() > endClock) {
+                for (const auto &newSuc: newSuccessors) {
+                    if (!isDuplicate(leafSuccessors, newSuc, characterId)) {
+                        leafSuccessors.push_back(newSuc);
+                    }
+                }
+                spdlog::info("early return");
+                return leafSuccessors;
             }
 
+
             // erase processed states in successors list and add newSuccessors to the correct list if they are no duplicate
-            successors.clear();
             for (const auto &newSuc: newSuccessors) {
                 if (newSuc.isLeafState) {
                     if (!isDuplicate(leafSuccessors, newSuc, characterId)) {

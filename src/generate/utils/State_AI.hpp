@@ -53,7 +53,8 @@ namespace spy::gameplay {
 
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                                        const spy::MatchConfig &config,
-                                                                       const libclient::LibClient &libClient);
+                                                                       const libclient::LibClient &libClient,
+                                                                       unsigned int maxDur);
 
             /**
              * adds hp damage to given character (modifies hpDiff list)

@@ -12,7 +12,15 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
                         const std::vector<spy::character::CharacterInformation> &characterConfig,
                         const libclient::LibClient &libClient, ApproachHelpers &approachHelper) {
     spy::gameplay::State_AI state{s};
-    auto endStates = state.getLeafSuccessorStates(characterId, config, libClient);
+
+    // time left
+    auto dur = config.getTurnPhaseLimit().value();
+    if (dur < 2) {
+        return random(characterId, s, config);
+    }
+    unsigned int maxDuration = (dur - 2) * 1000;
+
+    auto endStates = state.getLeafSuccessorStates(characterId, config, libClient, maxDuration);
 
     std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute = std::make_shared<spy::gameplay::RetireAction>(
             characterId);
