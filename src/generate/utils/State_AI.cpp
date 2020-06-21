@@ -39,12 +39,27 @@ namespace spy::gameplay {
                 newSuccessors.insert(newSuccessors.end(), sucBuf.begin(), sucBuf.end());
             }
 
-            // erase processed states in successors list and add newSuccessors to the correct list
+            // erase processed states in successors list and add newSuccessors to the correct list if they are no duplicate
             successors.clear();
+
+            auto isDuplicate = [](const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId) {
+                auto it = std::find_if(list.begin(), list.end(), [&state, &charId](const State_AI &s) {
+                    if (s == state) {
+                        auto charS = s.getCharacters().findByUUID(charId)->getCoordinates().value();
+                        auto charState = state.getCharacters().findByUUID(charId)->getCoordinates().value();
+                        return charS == charState;
+                    }
+                    return false;
+                });
+                return it != list.end();
+            };
+
             for (const auto &newSuc: newSuccessors) {
                 if (newSuc.isLeafState) {
-                    leafSuccessors.push_back(newSuc);
-                } else {
+                    if (!isDuplicate(leafSuccessors, newSuc, characterId)) {
+                        leafSuccessors.push_back(newSuc);
+                    }
+                } else if (!isDuplicate(successors, newSuc, characterId)) {
                     successors.push_back(newSuc);
                 }
             }
@@ -162,4 +177,41 @@ namespace spy::gameplay {
         }
         return false;
     }
+
+    bool State_AI::operator==(const State_AI &rhs) const {
+        bool isSame = std::tie(stateChance, isLeafState, collectedGadgets, usedGadgets, chipDiff, removedClammyClothes,
+                               addedClammyClothes, hpDiff, observationResult, nuggetResult, chickenfeedResult,
+                               mowResult,
+                               unknownGadgetsModifyingSuccess,
+                               removedCocktails, poisonedCocktails, destroyedRoulettes, invertedRoulette, foggyFields,
+                               destroyedWalls, spyResult, spyedSafes, movedMoledieTo) ==
+                      std::tie(rhs.stateChance, rhs.isLeafState, rhs.collectedGadgets, rhs.usedGadgets, rhs.chipDiff,
+                               rhs.removedClammyClothes, rhs.addedClammyClothes, rhs.hpDiff, rhs.observationResult,
+                               rhs.nuggetResult, rhs.chickenfeedResult, rhs.mowResult,
+                               rhs.unknownGadgetsModifyingSuccess,
+                               rhs.removedCocktails, rhs.poisonedCocktails, rhs.destroyedRoulettes,
+                               rhs.invertedRoulette,
+                               rhs.foggyFields, rhs.destroyedWalls, rhs.spyResult, rhs.spyedSafes, rhs.movedMoledieTo);
+
+        if (isSame && operationsLeadingToState.size() == rhs.operationsLeadingToState.size()) {
+            for (auto i = 0U; i < operationsLeadingToState.size(); i++) {
+                auto opS = operationsLeadingToState[i];
+                auto opRhs = rhs.operationsLeadingToState[i];
+                if (opS->getType() != opRhs->getType()) {
+                    return false;
+                }
+                if (opS->getType() == spy::gameplay::OperationEnum::GADGET_ACTION) {
+                    auto gadS = std::dynamic_pointer_cast<const GadgetAction>(opS);
+                    auto gadRhs = std::dynamic_pointer_cast<const GadgetAction>(opRhs);
+                    if (gadS->getGadget() != gadRhs->getGadget()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
 }

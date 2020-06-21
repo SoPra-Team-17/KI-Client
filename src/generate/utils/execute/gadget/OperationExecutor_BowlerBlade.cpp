@@ -40,7 +40,7 @@ OperationExecutor::executeBowlerBlade(const spy::gameplay::State_AI &state, cons
                                                                                   op.getTarget());
     auto hasTargetMagneticWatch = libClient.hasCharacterGadget(targetPerson->getCharacterId(),
                                                                spy::gadget::GadgetEnum::MAGNETIC_WATCH);
-    if (hasTargetMagneticWatch.value()) {
+    if (hasTargetMagneticWatch.has_value()) {
         if (hasTargetMagneticWatch.value() == 1) {
             return honeyStates;
         } else {

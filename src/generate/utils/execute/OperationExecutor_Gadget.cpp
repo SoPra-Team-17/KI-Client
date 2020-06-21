@@ -19,6 +19,9 @@ OperationExecutor::executeGadget(const spy::gameplay::State_AI &state, const spy
         if (character->getMovePoints() == 0 && character->getActionPoints() == 0) {
             s.isLeafState = true;
         }
+    } else {
+        s.operationsLeadingToState.pop_back();
+        s.operationsLeadingToState.push_back(std::make_shared<spy::gameplay::GadgetAction>(op));
     }
 
     using namespace spy::gadget;

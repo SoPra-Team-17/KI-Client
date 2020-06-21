@@ -96,6 +96,8 @@ namespace spy::gameplay {
 
             [[nodiscard]] std::vector<GadgetAction>
             getHoneyTrapAlternatives(GadgetAction a, const MatchConfig &config) const;
+
+            bool operator==(const State_AI &rhs) const;
     };
 }
 

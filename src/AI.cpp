@@ -18,7 +18,7 @@ AI::AI(std::string address, uint16_t port, std::string name, unsigned int verbos
 
     maxReconnect = additionalOptions.find("maxReconnect") != additionalOptions.end() ? std::stoi(
             additionalOptions.at("maxReconnect")) : 5;
-    delay = additionalOptions.find("nodelay") != additionalOptions.end() ? false : true;
+    delay = additionalOptions.find("nodelay") == additionalOptions.end();
 
     // set up logging
     Logging::initLogging(verbosity);
@@ -121,14 +121,15 @@ void AI::onRequestGameOperation() {
     auto stop = std::chrono::high_resolution_clock::now();
     auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
-    if (delay && waitTime - usedTime > std::chrono::milliseconds(1000)) {
+    spdlog::info("calculation time in ms: " + std::to_string(usedTime.count()));
+    if (waitTime - usedTime <= std::chrono::milliseconds(1000)) {
+        spdlog::warn("took too long to calculate");
+    } else if (delay) {
         auto diff = waitTime - usedTime;
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<unsigned int> randTime(0, diff.count());
         std::this_thread::sleep_for(std::chrono::milliseconds(randTime(gen)));
-    } else {
-        spdlog::warn("took too long to calculate");
     }
 
     if (!libClientHandler.network.sendGameOperation(nextOperation, matchConfig.value())) {

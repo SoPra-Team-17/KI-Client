@@ -4,7 +4,7 @@
 
 #include <generate/utils/State_AI.hpp>
 #include "../GameOperation_gen.hpp"
-#include "evalFunctions_caro.hpp"
+#include <datatypes/gameplay/RetireAction.hpp>
 
 std::shared_ptr<spy::gameplay::BaseOperation>
 GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay::State &s,
@@ -14,12 +14,13 @@ GameOperation_gen::caro(const spy::util::UUID &characterId, const spy::gameplay:
     spy::gameplay::State_AI state{s};
     auto endStates = state.getLeafSuccessorStates(characterId, config, libClient);
 
-    std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute;
+    std::shared_ptr<spy::gameplay::BaseOperation> operationToExecute = std::make_shared<spy::gameplay::RetireAction>(
+            characterId);
     double endVal = -std::numeric_limits<double>::infinity();
     for (auto &endS: endStates) {
         double val = approachHelper.evalFun_caro.value().gameOperation(state, endS, characterId, config,
-                                                       characterConfig,
-                                                       libClient);
+                                                                       characterConfig,
+                                                                       libClient);
         if (val > endVal) {
             endVal = val;
             operationToExecute = endS.operationsLeadingToState.at(0);

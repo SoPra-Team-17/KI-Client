@@ -575,6 +575,9 @@ double evalFunctions_caro::evalHp(const spy::gameplay::State_AI &s,
     }
     double myHp = 0;
     double enemyHp = 0;
+    if (s.hpDiff.empty()) {
+        return 0;
+    }
     for (const auto &pair: s.hpDiff) {
         if (libClient.hasCharacterFaction(pair.first, spy::character::FactionEnum::PLAYER1).value() == 1) {
             myHp += pair.second;
@@ -800,7 +803,7 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
             case spy::gadget::GadgetEnum::MOLEDIE:
                 if (libClient.hasCharacterFaction(s.movedMoledieTo, spy::character::FactionEnum::PLAYER1).value() ==
                     1) {
-                    return -std::numeric_limits<double>::infinity(); // do not put gadget to person of own faction
+                    return std::numeric_limits<double>::min() + 1; // do not put gadget to person of own faction if possible
                 } else {
                     retVal += midChance;
                 }

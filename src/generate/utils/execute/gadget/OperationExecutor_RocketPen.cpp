@@ -25,20 +25,34 @@ OperationExecutor::executeRocketPen(const spy::gameplay::State_AI &state, const 
         return {};
     }
 
-    // destroy potential wall on target field
     bool targetHasWall = (myState.getMap().getField(op.getTarget()).getFieldState() == spy::scenario::FieldStateEnum::WALL);
+    auto fieldWithWalls = spy::util::GameLogicUtils::getNearFieldsInDist(myState, op.getTarget(), 1,
+                                                                         [&myState](const spy::util::Point &p) {
+                                                                             return myState.getMap().getField(
+                                                                                     p).getFieldState() ==
+                                                                                    spy::scenario::FieldStateEnum::WALL;
+                                                                         });
+    auto damage = config.getRocketPenDamage();
+    bool targetHasPerson = spy::util::GameLogicUtils::isPersonOnField(myState, op.getTarget());
+    auto charPoints = spy::util::GameLogicUtils::getNearFieldsInDist(myState, op.getTarget(), 1, [&myState](const spy::util::Point &p) {
+        return spy::util::GameLogicUtils::isPersonOnField(myState, p);
+    });
+
+    if (!targetHasWall && fieldWithWalls.first.empty()) {
+        // there are not walls that get destroyed
+        if (damage == 0 || (!targetHasPerson && charPoints.first.empty())) {
+            // there is no damage or no characters to damage
+            return {};
+        }
+    }
+
+    // destroy potential wall on target field
     if (targetHasWall) {
         myState.getMap().getField(op.getTarget()).setFieldState(spy::scenario::FieldStateEnum::FREE);
         myState.destroyedWalls.push_back(op.getTarget());
     }
 
     //Neighboring fields that have walls on them
-    auto fieldWithWalls = spy::util::GameLogicUtils::getNearFieldsInDist(myState, op.getTarget(), 1,
-                                                                    [&myState](const spy::util::Point &p) {
-                                                                        return myState.getMap().getField(
-                                                                                p).getFieldState() ==
-                                                                                spy::scenario::FieldStateEnum::WALL;
-                                                                    });
     if (fieldWithWalls.second) {
         for (const auto &p : fieldWithWalls.first) {
             myState.getMap().getField(p).setFieldState(spy::scenario::FieldStateEnum::FREE);
@@ -46,20 +60,14 @@ OperationExecutor::executeRocketPen(const spy::gameplay::State_AI &state, const 
         }
     }
 
-    auto damage = config.getRocketPenDamage();
-
     // damage on targetfield, if there is a person
-    bool targetHasPerson = spy::util::GameLogicUtils::isPersonOnField(myState, op.getTarget());
     if (targetHasPerson) {
         auto person = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(myState.getCharacters(), op.getTarget());
         spy::util::GameLogicUtils::applyDamageToCharacter(myState, *person, damage);
         myState.addDamage(*person, damage);
     }
 
-    // get characters on neighboring fields
-    auto charPoints = spy::util::GameLogicUtils::getNearFieldsInDist(myState, op.getTarget(), 1, [&myState](const spy::util::Point &p) {
-        return spy::util::GameLogicUtils::isPersonOnField(myState, p);
-    });
+    // damage on characters on neighboring fields
     if (charPoints.second) {
         for (const auto &p : charPoints.first) {
             auto person = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(myState.getCharacters(), p);
