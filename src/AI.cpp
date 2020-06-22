@@ -108,10 +108,10 @@ void AI::onGameStatus() {
 void AI::onRequestGameOperation() {
     spdlog::info("received RequestGameOperation message");
 
-    auto waitTime = std::chrono::milliseconds(1000);
+    std::optional<std::chrono::milliseconds> waitTime = std::nullopt;
     auto limit = matchConfig.value().getTurnPhaseLimit();
-    if (limit.has_value() && limit.value() > 1) {
-        waitTime = std::chrono::milliseconds((limit.value() - 1) * 1000);
+    if (limit.has_value()) {
+        waitTime = std::chrono::milliseconds(limit.value() * 1000);
     }
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -122,14 +122,16 @@ void AI::onRequestGameOperation() {
     auto usedTime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 
     spdlog::info("calculation time in ms: " + std::to_string(usedTime.count()));
-    if (waitTime - usedTime <= std::chrono::milliseconds(1000)) {
-        spdlog::warn("took too long to calculate");
-    } else if (delay) {
-        auto diff = waitTime - usedTime;
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<unsigned int> randTime(0, diff.count());
-        std::this_thread::sleep_for(std::chrono::milliseconds(randTime(gen)));
+    if (waitTime.has_value()) {
+        auto diff = waitTime.value() - usedTime;
+        if (diff <= std::chrono::milliseconds(1000)) {
+            spdlog::warn("took (too) long to calculate");
+        } else if (delay) {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<unsigned int> randTime(0, diff.count());
+            std::this_thread::sleep_for(std::chrono::milliseconds(randTime(gen)));
+        }
     }
 
     if (!libClientHandler.network.sendGameOperation(nextOperation, matchConfig.value())) {

@@ -54,7 +54,7 @@ namespace spy::gameplay {
             [[nodiscard]] std::vector<State_AI> getLeafSuccessorStates(const spy::util::UUID &characterId,
                                                                        const spy::MatchConfig &config,
                                                                        const libclient::LibClient &libClient,
-                                                                       unsigned int maxDur);
+                                                                       std::optional<std::chrono::milliseconds> maxDur);
 
             /**
              * adds hp damage to given character (modifies hpDiff list)
@@ -90,6 +90,14 @@ namespace spy::gameplay {
              */
             bool handleBabysitter(const GadgetAction &op, const MatchConfig &config);
 
+            /**
+             * get chance of winning when character gambles on roulette standing on field
+             * @param character character that is gambling
+             * @param field field on which the roulette table stands the character is gambling on
+             * @return double representing the chance of winning when playing roulette
+             */
+            static double getGambleWinningChance(const spy::character::Character &character, const spy::scenario::Field &field);
+
         private:
             void getSuccessorStates(const spy::util::UUID &characterId,
                                     const spy::MatchConfig &config,
@@ -101,7 +109,14 @@ namespace spy::gameplay {
 
             bool operator==(const State_AI &rhs) const;
 
-            static bool isDuplicate(const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId);
+            /**
+             * helper for getLeafSuccessorStates
+             * identifies if this state is a "duplicate" in the manner that the states are equal to their outcome/result
+             * @param list list of State_AI to search for if state is already in list (as duplicate)
+             * @param charId id of the character that made actions to reach the state
+             * @return true if state is a duplicate, else false
+             */
+            bool isDuplicate(const std::vector<State_AI> &list, const util::UUID &charId) const;
     };
 }
 

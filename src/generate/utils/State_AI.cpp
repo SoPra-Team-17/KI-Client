@@ -27,9 +27,15 @@ namespace spy::gameplay {
     std::vector<State_AI>
     State_AI::getLeafSuccessorStates(const util::UUID &characterId,
                                      const spy::MatchConfig &config, const libclient::LibClient &libClient,
-                                     unsigned int maxDur) {
-        auto endClock = std::chrono::system_clock::now() + std::chrono::milliseconds(maxDur);
+                                     std::optional<std::chrono::milliseconds> maxDur) {
+        auto endClock = std::chrono::system_clock::now();
+        if (maxDur.has_value()) {
+            endClock += maxDur.value();
+        } else {
+            endClock += std::chrono::hours(std::numeric_limits<int>::max());
+        }
 
+        bool earlyReturn;
         std::vector<State_AI> leafSuccessors;
         std::vector<State_AI> successors = {*this};
 
@@ -41,26 +47,23 @@ namespace spy::gameplay {
             successors.pop_back();
 
             // early return
-            if (std::chrono::system_clock::now() > endClock) {
-                for (const auto &newSuc: newSuccessors) {
-                    if (!isDuplicate(leafSuccessors, newSuc, characterId)) {
-                        leafSuccessors.push_back(newSuc);
-                    }
-                }
-                spdlog::info("early return");
-                return leafSuccessors;
-            }
-
+            earlyReturn = std::chrono::high_resolution_clock::now() > endClock;
 
             // erase processed states in successors list and add newSuccessors to the correct list if they are no duplicate
             for (const auto &newSuc: newSuccessors) {
                 if (newSuc.isLeafState) {
-                    if (!isDuplicate(leafSuccessors, newSuc, characterId)) {
+                    if (!newSuc.isDuplicate(leafSuccessors, characterId)) {
                         leafSuccessors.push_back(newSuc);
                     }
-                } else if (!isDuplicate(successors, newSuc, characterId)) {
+                } else if (!earlyReturn && !newSuc.isDuplicate(successors, characterId)) {
+                    // if earlyReturn we do not have to update this list
                     successors.push_back(newSuc);
                 }
+            }
+
+            if (earlyReturn) {
+                // exit while loop and return leafSuccessors
+                break;
             }
         }
 
@@ -213,7 +216,8 @@ namespace spy::gameplay {
         return false;
     }
 
-    bool State_AI::isDuplicate(const std::vector<State_AI> &list, const State_AI &state, const util::UUID &charId) {
+    bool State_AI::isDuplicate(const std::vector<State_AI> &list, const util::UUID &charId) const {
+        const auto &state = *this;
         auto it = std::find_if(list.begin(), list.end(), [&state, &charId](const State_AI &s) {
             if (s == state) {
                 auto charS = s.getCharacters().findByUUID(charId)->getCoordinates().value();
@@ -223,6 +227,18 @@ namespace spy::gameplay {
             return false;
         });
         return it != list.end();
+    }
+
+    double State_AI::getGambleWinningChance(const spy::character::Character &character, const spy::scenario::Field &field) {
+        double winningChance = 18.0/37.0;
+        if (character.hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
+            winningChance = 32.0/37.0;
+        } else if (character.hasProperty(spy::character::PropertyEnum::JINX)) {
+            winningChance = 13.0/37.0;
+        }
+        winningChance = field.isInverted().value() ? (1-winningChance) : winningChance;
+
+        return winningChance;
     }
 
 }

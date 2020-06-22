@@ -19,13 +19,7 @@ OperationExecutor::executeGamble(const spy::gameplay::State_AI &state, const spy
 
     // get winning chance
     auto targetField = sWon.getMap().getField(op.getTarget());
-    double winningChance = 18.0/37.0;
-    if (character->hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
-        winningChance = 32.0/37.0;
-    } else if (character->hasProperty(spy::character::PropertyEnum::JINX)) {
-        winningChance = 13.0/37.0;
-    }
-    winningChance = targetField.isInverted().value() ? (1-winningChance) : winningChance;
+    double winningChance = spy::gameplay::State_AI::getGambleWinningChance(*character, targetField);
     sWon.modStateChance(*character, winningChance);
 
     // won in roulette

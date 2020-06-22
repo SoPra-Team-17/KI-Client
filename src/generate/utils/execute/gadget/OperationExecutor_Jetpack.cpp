@@ -15,26 +15,23 @@ OperationExecutor::executeJetpack(const spy::gameplay::State_AI &state, const sp
         return {}; // you can move there
     }
 
-    auto neighbourPoints = spy::util::GameLogicUtils::getNearFieldsInDist(s, op.getTarget(), 1,
-                                                                          [&s](const spy::util::Point &p) {
-                                                                              auto fieldState = s.getMap().getField(
-                                                                                      p).getFieldState();
-                                                                              return (fieldState !=
-                                                                                      spy::scenario::FieldStateEnum::FREE &&
-                                                                                      fieldState !=
-                                                                                      spy::scenario::FieldStateEnum::WALL) ||
-                                                                                     spy::util::GameLogicUtils::isPersonOnField(
-                                                                                             s, p) ||
-                                                                                     s.getCatCoordinates() == p;
-                                                                          });
+    auto neighbourPoints =
+        spy::util::GameLogicUtils::getNearFieldsInDist(s, op.getTarget(), 1,
+                                                       [&s](const spy::util::Point &p) {
+                                                           auto fieldState = s.getMap().getField(p).getFieldState();
+                                                           return (fieldState != spy::scenario::FieldStateEnum::FREE &&
+                                                                   fieldState != spy::scenario::FieldStateEnum::WALL) ||
+                                                                  spy::util::GameLogicUtils::isPersonOnField(s, p) ||
+                                                                  s.getCatCoordinates() == p;
+                                                       });
     if (neighbourPoints.first.empty()) {
         if (character->hasProperty(spy::character::PropertyEnum::FLAPS_AND_SEALS)) {
-            auto morePoints = spy::util::GameLogicUtils::getNearFieldsInDist(s, op.getTarget(), 1,
-                                                                             [&s](const spy::util::Point &p) {
-                                                                                 return s.getMap().getField(
-                                                                                         p).getFieldState() ==
-                                                                                        spy::scenario::FieldStateEnum::SAFE;
-                                                                             });
+            auto morePoints =
+                spy::util::GameLogicUtils::getNearFieldsInDist(s, op.getTarget(), 1,
+                                                               [&s](const spy::util::Point &p) {
+                                                                   return s.getMap().getField(p).getFieldState() ==
+                                                                          spy::scenario::FieldStateEnum::SAFE;
+                                                               });
             if (morePoints.first.empty()) {
                 return {}; // no obvious reason to fly there
             }
