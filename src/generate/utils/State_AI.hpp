@@ -116,7 +116,15 @@ namespace spy::gameplay {
              * @param charId id of the character that made actions to reach the state
              * @return true if state is a duplicate, else false
              */
-            bool isDuplicate(const std::vector<State_AI> &list, const util::UUID &charId) const;
+            [[nodiscard]] bool isDuplicate(const std::vector<State_AI> &list, const util::UUID &charId) const;
+
+            /**
+             * get success chance for character taking properties clammy clothes and tradecraft into account
+             * @param character character that does chance test
+             * @param chance chance of success for test
+             * @return double adapted chance according to character properties
+             */
+            static double getChanceForCharacter(const spy::character::Character &character, double chance);
     };
 }
 

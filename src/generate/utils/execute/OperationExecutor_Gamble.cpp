@@ -20,7 +20,7 @@ OperationExecutor::executeGamble(const spy::gameplay::State_AI &state, const spy
     // get winning chance
     auto targetField = sWon.getMap().getField(op.getTarget());
     double winningChance = spy::gameplay::State_AI::getGambleWinningChance(*character, targetField);
-    sWon.modStateChance(*character, winningChance);
+    sWon.stateChance *= winningChance;
 
     // won in roulette
     character->setChips(character->getChips() + op.getStake());

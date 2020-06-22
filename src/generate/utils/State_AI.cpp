@@ -87,22 +87,9 @@ namespace spy::gameplay {
     }
 
     void State_AI::modStateChance(const character::Character &character, double successChance) {
-        using spy::character::PropertyEnum;
-        using spy::gadget::GadgetEnum;
+        auto chance = getChanceForCharacter(character, successChance);
 
-        // character with clammy clothes only has half the chance of success
-        if (character.hasProperty(PropertyEnum::CLAMMY_CLOTHES) ||
-            character.hasProperty(PropertyEnum::CONSTANT_CLAMMY_CLOTHES)) {
-            successChance /= 2;
-        }
-
-        // if char has tradecraft and not mole die, prob. test is repeated
-        if (character.hasProperty(PropertyEnum::TRADECRAFT)
-            && !character.hasGadget(GadgetEnum::MOLEDIE)) {
-            successChance = 1 - std::pow(1 - successChance, 2);
-        }
-
-        stateChance *= successChance;
+        stateChance *= chance;
     }
 
     std::pair<std::vector<State_AI>, bool> State_AI::handleHoneyTrap(const GadgetAction &op, const MatchConfig &config,
@@ -238,7 +225,26 @@ namespace spy::gameplay {
         }
         winningChance = field.isInverted().value() ? (1-winningChance) : winningChance;
 
-        return winningChance;
+        return getChanceForCharacter(character, winningChance);
+    }
+
+    double State_AI::getChanceForCharacter(const spy::character::Character &character, double chance) {
+        using spy::character::PropertyEnum;
+        using spy::gadget::GadgetEnum;
+
+        // character with clammy clothes only has half the chance of success
+        if (character.hasProperty(PropertyEnum::CLAMMY_CLOTHES) ||
+            character.hasProperty(PropertyEnum::CONSTANT_CLAMMY_CLOTHES)) {
+            chance /= 2;
+        }
+
+        // if char has tradecraft and not mole die, prob. test is repeated
+        if (character.hasProperty(PropertyEnum::TRADECRAFT)
+            && !character.hasGadget(GadgetEnum::MOLEDIE)) {
+            chance = 1 - std::pow(1 - chance, 2);
+        }
+
+        return chance;
     }
 
 }

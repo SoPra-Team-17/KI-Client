@@ -701,11 +701,11 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
             for (const auto &p: bartablePositions) {
                 auto bar = s.getMap().getField(p);
                 if (bar.getGadget().has_value()) {
-                    auto cocktail = std::dynamic_pointer_cast<spy::gadget::Cocktail>(
+                    bool isCocktailPoisoned = std::dynamic_pointer_cast<spy::gadget::Cocktail>(
                             bar.getGadget().value())->isPoisoned();
                     double val =
                             static_cast<double>(config.getCocktailHealthPoints()) / maxHealthPoints * thirdWinningReason;
-                    retVal += cocktail ? val : -val;
+                    retVal += isCocktailPoisoned ? val : -val;
                 }
             }
         }
