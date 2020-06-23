@@ -7,13 +7,14 @@
 #include "State_AI.hpp"
 #include "generate/OperationGenerator.hpp"
 #include "execute/OperationExecutor.hpp"
+#include <spdlog/spdlog.h>
 
 namespace spy::gameplay {
 
-    std::vector<State_AI> State_AI::getSuccessorStates(const util::UUID &characterId,
-                                                       const spy::MatchConfig &config,
-                                                       const libclient::LibClient &libClient) {
-        std::vector<State_AI> successors;
+    void State_AI::getSuccessorStates(const util::UUID &characterId,
+                                      const spy::MatchConfig &config,
+                                      const libclient::LibClient &libClient,
+                                      std::vector<State_AI> &successors) {
         this->wasHoneyTrapUsed = false;
         auto operations = OperationGenerator::generate(*this, characterId, config);
 
@@ -21,32 +22,48 @@ namespace spy::gameplay {
             auto successorStates = OperationExecutor::execute(*this, op, config, libClient);
             successors.insert(successors.end(), successorStates.begin(), successorStates.end());
         }
-
-        return successors;
     }
 
     std::vector<State_AI>
     State_AI::getLeafSuccessorStates(const util::UUID &characterId,
-                                     const spy::MatchConfig &config, const libclient::LibClient &libClient) {
+                                     const spy::MatchConfig &config, const libclient::LibClient &libClient,
+                                     std::optional<std::chrono::milliseconds> maxDur) {
+        auto endClock = std::chrono::system_clock::now();
+        if (maxDur.has_value()) {
+            endClock += maxDur.value();
+        } else {
+            endClock += std::chrono::hours(std::numeric_limits<int>::max());
+        }
+
+        bool earlyReturn;
         std::vector<State_AI> leafSuccessors;
         std::vector<State_AI> successors = {*this};
 
         while (!successors.empty()) {
             // get successors of states in successors list
             std::vector<State_AI> newSuccessors;
-            for (auto &suc: successors) {
-                auto sucBuf = suc.getSuccessorStates(characterId, config, libClient);
-                newSuccessors.insert(newSuccessors.end(), sucBuf.begin(), sucBuf.end());
-            }
+            auto suc = successors.back();
+            suc.getSuccessorStates(characterId, config, libClient, newSuccessors);
+            successors.pop_back();
 
-            // erase processed states in successors list and add newSuccessors to the correct list
-            successors.clear();
+            // early return
+            earlyReturn = std::chrono::high_resolution_clock::now() > endClock;
+
+            // erase processed states in successors list and add newSuccessors to the correct list if they are no duplicate
             for (const auto &newSuc: newSuccessors) {
                 if (newSuc.isLeafState) {
-                    leafSuccessors.push_back(newSuc);
-                } else {
+                    if (!newSuc.isDuplicate(leafSuccessors, characterId)) {
+                        leafSuccessors.push_back(newSuc);
+                    }
+                } else if (!earlyReturn && !newSuc.isDuplicate(successors, characterId)) {
+                    // if earlyReturn we do not have to update this list
                     successors.push_back(newSuc);
                 }
+            }
+
+            if (earlyReturn) {
+                // exit while loop and return leafSuccessors
+                break;
             }
         }
 
@@ -70,22 +87,9 @@ namespace spy::gameplay {
     }
 
     void State_AI::modStateChance(const character::Character &character, double successChance) {
-        using spy::character::PropertyEnum;
-        using spy::gadget::GadgetEnum;
+        auto chance = getChanceForCharacter(character, successChance);
 
-        // character with clammy clothes only has half the chance of success
-        if (character.hasProperty(PropertyEnum::CLAMMY_CLOTHES) ||
-            character.hasProperty(PropertyEnum::CONSTANT_CLAMMY_CLOTHES)) {
-            successChance /= 2;
-        }
-
-        // if char has tradecraft and not mole die, prob. test is repeated
-        if (character.hasProperty(PropertyEnum::TRADECRAFT)
-            && !character.hasGadget(GadgetEnum::MOLEDIE)) {
-            successChance = 1 - std::pow(1 - successChance, 2);
-        }
-
-        stateChance *= successChance;
+        stateChance *= chance;
     }
 
     std::pair<std::vector<State_AI>, bool> State_AI::handleHoneyTrap(const GadgetAction &op, const MatchConfig &config,
@@ -162,4 +166,85 @@ namespace spy::gameplay {
         }
         return false;
     }
+
+    bool State_AI::operator==(const State_AI &rhs) const {
+        bool isSame = std::tie(stateChance, isLeafState, collectedGadgets, usedGadgets, chipDiff, removedClammyClothes,
+                               addedClammyClothes, hpDiff, observationResult, nuggetResult, chickenfeedResult,
+                               mowResult,
+                               unknownGadgetsModifyingSuccess,
+                               removedCocktails, poisonedCocktails, destroyedRoulettes, invertedRoulette, foggyFields,
+                               destroyedWalls, spyResult, spyedSafes, movedMoledieTo) ==
+                      std::tie(rhs.stateChance, rhs.isLeafState, rhs.collectedGadgets, rhs.usedGadgets, rhs.chipDiff,
+                               rhs.removedClammyClothes, rhs.addedClammyClothes, rhs.hpDiff, rhs.observationResult,
+                               rhs.nuggetResult, rhs.chickenfeedResult, rhs.mowResult,
+                               rhs.unknownGadgetsModifyingSuccess,
+                               rhs.removedCocktails, rhs.poisonedCocktails, rhs.destroyedRoulettes,
+                               rhs.invertedRoulette,
+                               rhs.foggyFields, rhs.destroyedWalls, rhs.spyResult, rhs.spyedSafes, rhs.movedMoledieTo);
+
+        if (isSame && operationsLeadingToState.size() == rhs.operationsLeadingToState.size()) {
+            for (auto i = 0U; i < operationsLeadingToState.size(); i++) {
+                auto opS = operationsLeadingToState[i];
+                auto opRhs = rhs.operationsLeadingToState[i];
+                if (opS->getType() != opRhs->getType()) {
+                    return false;
+                }
+                if (opS->getType() == spy::gameplay::OperationEnum::GADGET_ACTION) {
+                    auto gadS = std::dynamic_pointer_cast<const GadgetAction>(opS);
+                    auto gadRhs = std::dynamic_pointer_cast<const GadgetAction>(opRhs);
+                    if (gadS->getGadget() != gadRhs->getGadget()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    bool State_AI::isDuplicate(const std::vector<State_AI> &list, const util::UUID &charId) const {
+        const auto &state = *this;
+        auto it = std::find_if(list.begin(), list.end(), [&state, &charId](const State_AI &s) {
+            if (s == state) {
+                auto charS = s.getCharacters().findByUUID(charId)->getCoordinates().value();
+                auto charState = state.getCharacters().findByUUID(charId)->getCoordinates().value();
+                return charS == charState;
+            }
+            return false;
+        });
+        return it != list.end();
+    }
+
+    double State_AI::getGambleWinningChance(const spy::character::Character &character, const spy::scenario::Field &field) {
+        double winningChance = 18.0/37.0;
+        if (character.hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
+            winningChance = 32.0/37.0;
+        } else if (character.hasProperty(spy::character::PropertyEnum::JINX)) {
+            winningChance = 13.0/37.0;
+        }
+        winningChance = field.isInverted().value() ? (1-winningChance) : winningChance;
+
+        return getChanceForCharacter(character, winningChance);
+    }
+
+    double State_AI::getChanceForCharacter(const spy::character::Character &character, double chance) {
+        using spy::character::PropertyEnum;
+        using spy::gadget::GadgetEnum;
+
+        // character with clammy clothes only has half the chance of success
+        if (character.hasProperty(PropertyEnum::CLAMMY_CLOTHES) ||
+            character.hasProperty(PropertyEnum::CONSTANT_CLAMMY_CLOTHES)) {
+            chance /= 2;
+        }
+
+        // if char has tradecraft and not mole die, prob. test is repeated
+        if (character.hasProperty(PropertyEnum::TRADECRAFT)
+            && !character.hasGadget(GadgetEnum::MOLEDIE)) {
+            chance = 1 - std::pow(1 - chance, 2);
+        }
+
+        return chance;
+    }
+
 }

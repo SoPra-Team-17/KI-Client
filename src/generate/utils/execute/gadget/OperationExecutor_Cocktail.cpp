@@ -28,9 +28,6 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
         targetField.removeGadget();
         sSuccess.collectedGadgets.push_back(op.getGadget());
     } else {
-        // remove the cocktail as it was used
-        sourceChar->removeGadget(spy::gadget::GadgetEnum::COCKTAIL);
-
         if (drink) {
             auto configHP = config.getCocktailHealthPoints();
             if (configHP == 0) {
@@ -42,8 +39,9 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
             if (cocktail->isPoisoned()) {
                 return {};
             } else {
-                int cocktailHP = static_cast<int>(sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH) ? 2 * configHP
-                                                                                                        : configHP);
+                int cocktailHP = static_cast<int>(sourceChar->hasProperty(spy::character::PropertyEnum::ROBUST_STOMACH)
+                                                  ? 2 * configHP
+                                                  : configHP);
                 sourceChar->addHealthPoints(cocktailHP);
                 sSuccess.addDamage(*sourceChar, -cocktailHP); // negative damage -> add hp
             }
@@ -55,7 +53,8 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
                 return honeyStates;
             }
 
-            auto targetChar = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(sSuccess.getCharacters(), op.getTarget());
+            auto targetChar = spy::util::GameLogicUtils::getInCharacterSetByCoordinates(sSuccess.getCharacters(),
+                                                                                        op.getTarget());
             sSuccess.modStateChance(*targetChar, 1 - config.getCocktailDodgeChance());
             if (targetChar->hasProperty(spy::character::PropertyEnum::CONSTANT_CLAMMY_CLOTHES) ||
                 targetChar->hasProperty(spy::character::PropertyEnum::CLAMMY_CLOTHES)) {
@@ -65,6 +64,9 @@ OperationExecutor::executeCocktail(const spy::gameplay::State_AI &state, const s
                 sSuccess.addedClammyClothes.insert(targetChar->getCharacterId());
             }
         }
+
+        // remove the cocktail as it was used
+        sourceChar->removeGadget(spy::gadget::GadgetEnum::COCKTAIL);
     }
 
     honeyStates.push_back(sSuccess);

@@ -15,11 +15,16 @@ OperationExecutor::executeFogTin(const spy::gameplay::State_AI &state, const spy
         return true;
     });
 
+    bool characterInFog = spy::util::GameLogicUtils::isPersonOnField(s, op.getTarget());
     if (points.second) {
         for (const auto &p : points.first) {
+            characterInFog = characterInFog || spy::util::GameLogicUtils::isPersonOnField(s, p);
             s.getMap().getField(p).setFoggy(true);
             s.foggyFields.push_back(p);
         }
+    }
+    if (!characterInFog) {
+        return {}; // no obvious reason to put fog there
     }
 
     // remove fog tin from inventory

@@ -131,8 +131,13 @@ class evalFunctions_caro {
                        const libclient::LibClient &libClient);
 
         static constexpr double maxHealthPoints = 100.0;
-        static constexpr double winningReason = 10;
         static constexpr double unsureLimit = 0.5;
+        static constexpr double winningReasonFactor = 10.0;
+        static constexpr double firstWinningReason = winningReasonFactor;
+        static constexpr double secondWinningReason = 4.0 / 5.0 * winningReasonFactor;
+        static constexpr double thirdWinningReason = 3.0 / 5.0 * winningReasonFactor;
+        static constexpr double fourthWinningReason = 2.0 / 5.0 * winningReasonFactor;
+        static constexpr double fifthWinningReason = 1.0 / 5.0 * winningReasonFactor;
 
         double numMyChar;
         double numEnemyChar;

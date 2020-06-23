@@ -491,9 +491,9 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
             used.erase(g);
             retVal += itemChoice(gad, config, characterConfig);
             if (gad == spy::gadget::GadgetEnum::DIAMOND_COLLAR) {
-                retVal += config.getCatIp() / maxIpInCasino * winningReason;
+                retVal += config.getCatIp() / maxIpInCasino * secondWinningReason;
             } else if (gad == spy::gadget::GadgetEnum::COCKTAIL) {
-                retVal += static_cast<double>(config.getCocktailHealthPoints()) / maxHealthPoints * winningReason;
+                retVal += static_cast<double>(config.getCocktailHealthPoints()) / maxHealthPoints * thirdWinningReason;
             }
         }
     }
@@ -523,7 +523,7 @@ double evalFunctions_caro::gameOperation(const spy::gameplay::State_AI &start, s
     }
 
     // gamble
-    retVal += s.chipDiff * chipsToIpJudge * winningReason;
+    retVal += s.chipDiff * chipsToIpJudge * firstWinningReason;
 
     // properties
     val = evalUsedProperties(s, libClient);
@@ -575,6 +575,9 @@ double evalFunctions_caro::evalHp(const spy::gameplay::State_AI &s,
     }
     double myHp = 0;
     double enemyHp = 0;
+    if (s.hpDiff.empty()) {
+        return 0;
+    }
     for (const auto &pair: s.hpDiff) {
         if (libClient.hasCharacterFaction(pair.first, spy::character::FactionEnum::PLAYER1).value() == 1) {
             myHp += pair.second;
@@ -590,7 +593,7 @@ double evalFunctions_caro::evalHp(const spy::gameplay::State_AI &s,
     if (enemyHp >= myHp) {
         return -std::numeric_limits<double>::infinity(); // do not damage your faction more than enemy faction
     }
-    retVal += (myHp - enemyHp) / maxHealthPoints * winningReason;
+    retVal += (myHp - enemyHp) / maxHealthPoints * fifthWinningReason;
 
     return retVal;
 }
@@ -612,8 +615,10 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
         return -std::numeric_limits<double>::infinity(); // not useful to use jetpack for this -> you can move there
     }
     if (endPoint != startPoint) {
+        retVal += std::numeric_limits<double>::epsilon(); // to not take retire if move is possible
         auto endField = s.getMap().getField(endPoint);
 
+        const auto &getCombisFromNpcs = libClient.getCombinationsFromNpcs();
         const auto &openedSafes = libClient.getOpenedSafes();
         const auto &triedSafes = libClient.getTriedSafes();
         const auto &safeCombis = libClient.getSafeCombinations();
@@ -630,7 +635,7 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
                     std::find(endJanitorTargets.begin(), endJanitorTargets.end(), endPoint) != endJanitorTargets.end();
 
             if (inStart && !inEnd) {
-                retVal += winningReason;
+                retVal += firstWinningReason;
             } else if (!inStart && inEnd) {
                 return -std::numeric_limits<double>::infinity(); // do not walk to janitor
             }
@@ -640,12 +645,11 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
             myCharacter->hasGadget(spy::gadget::GadgetEnum::DIAMOND_COLLAR)) {
             auto startDistToCat = spy::gameplay::Movement::getMoveDistance(s.getCatCoordinates().value(), startPoint);
             auto endDistToCat = spy::gameplay::Movement::getMoveDistance(s.getCatCoordinates().value(), endPoint);
-            retVal += (startDistToCat - endDistToCat) / maxPlayingFieldDim * winningReason;
+            retVal += (startDistToCat - endDistToCat) / maxPlayingFieldDim * secondWinningReason;
         }
 
         if (myCharacter->hasProperty(spy::character::PropertyEnum::CLAMMY_CLOTHES) &&
             !myCharacter->hasProperty(spy::character::PropertyEnum::CONSTANT_CLAMMY_CLOTHES)) {
-
             bool endFireplace = endField.getFieldState() == spy::scenario::FieldStateEnum::FIREPLACE;
             retVal += endFireplace ? midChance : -midChance;
         }
@@ -662,7 +666,7 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
             }
             auto startDist = spy::gameplay::Movement::getMoveDistance(p, startPoint);
             auto endDist = spy::gameplay::Movement::getMoveDistance(p, endPoint);
-            double val = 1.0 / (numSafes - static_cast<double>(openedSafes.size())) * winningReason;
+            double val = 1.0 / (numSafes - static_cast<double>(openedSafes.size())) * firstWinningReason;
             retVal += endDist < startDist ? val : -val;
         }
 
@@ -673,32 +677,36 @@ double evalFunctions_caro::evalPosition(const spy::gameplay::State_AI &start,
                 auto startDist = spy::gameplay::Movement::getMoveDistance(npc.value(), startPoint);
                 auto endDist = spy::gameplay::Movement::getMoveDistance(npc.value(), endPoint);
                 double val = config.getSpySuccessChance();
-                retVal += endDist < startDist ? val : -val;
-            }
-        }
-
-        for (const auto &p: roulettetablePositions) {
-            auto roulette = s.getMap().getField(p);
-            if (!roulette.isDestroyed().value()) {
-                auto startDist = spy::gameplay::Movement::getMoveDistance(p, startPoint);
-                auto endDist = spy::gameplay::Movement::getMoveDistance(p, endPoint);
-                double val = 18.0 / 37.0;
-                if (myCharacter->hasProperty(spy::character::PropertyEnum::LUCKY_DEVIL)) {
-                    val = 32.0 / 37.0;
-                } else if (myCharacter->hasProperty(spy::character::PropertyEnum::JINX)) {
-                    val = 13.0 / 37.0;
+                if (getCombisFromNpcs.find(npcId) != getCombisFromNpcs.end()) {
+                    val *= 0.5;
                 }
-                val = roulette.isInverted().value() ? (1 - val) : val;
                 retVal += endDist < startDist ? val : -val;
             }
         }
 
-        for (const auto &p: bartablePositions) {
-            auto bar = s.getMap().getField(p);
-            if (bar.getGadget().has_value()) {
-                auto cocktail = std::dynamic_pointer_cast<spy::gadget::Cocktail>(bar.getGadget().value())->isPoisoned();
-                double val = static_cast<double>(config.getCocktailHealthPoints()) / maxHealthPoints * winningReason;
-                retVal += cocktail ? val : -val;
+        if (myCharacter->getChips() > 0) {
+            for (const auto &p: roulettetablePositions) {
+                auto roulette = s.getMap().getField(p);
+                if (!roulette.isDestroyed().value()) {
+                    auto startDist = spy::gameplay::Movement::getMoveDistance(p, startPoint);
+                    auto endDist = spy::gameplay::Movement::getMoveDistance(p, endPoint);
+                    double val = spy::gameplay::State_AI::getGambleWinningChance(*myCharacter, roulette);
+                    val *= firstWinningReason;
+                    retVal += endDist < startDist ? val : -val;
+                }
+            }
+        }
+
+        if (!myCharacter->hasGadget(spy::gadget::GadgetEnum::COCKTAIL)) {
+            for (const auto &p: bartablePositions) {
+                auto bar = s.getMap().getField(p);
+                if (bar.getGadget().has_value()) {
+                    bool isCocktailPoisoned = std::dynamic_pointer_cast<spy::gadget::Cocktail>(
+                            bar.getGadget().value())->isPoisoned();
+                    double val =
+                            static_cast<double>(config.getCocktailHealthPoints()) / maxHealthPoints * thirdWinningReason;
+                    retVal += isCocktailPoisoned ? val : -val;
+                }
             }
         }
     }
@@ -722,7 +730,7 @@ double evalFunctions_caro::evalSpy(const spy::gameplay::State_AI &s,
             if (getCombisFromNpcs.find(pair.first) != getCombisFromNpcs.end()) {
                 retVal += (pair.second.value() - unsureLimit) * 0.5;
             } else {
-                retVal += (pair.second.value() - unsureLimit) * secretsToIpJudge * winningReason;
+                retVal += (pair.second.value() - unsureLimit) * secretsToIpJudge * firstWinningReason;
             }
         }
     }
@@ -736,7 +744,7 @@ double evalFunctions_caro::evalSpy(const spy::gameplay::State_AI &s,
                 return -std::numeric_limits<double>::infinity(); // do not reopen already tried safes without new combis
             }
         }
-        retVal += 1.0 / (numSafes - static_cast<double>(openedSafes.size())) * winningReason;
+        retVal += 1.0 / (numSafes - static_cast<double>(openedSafes.size())) * firstWinningReason;
     }
 
     return retVal;
@@ -800,7 +808,7 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
             case spy::gadget::GadgetEnum::MOLEDIE:
                 if (libClient.hasCharacterFaction(s.movedMoledieTo, spy::character::FactionEnum::PLAYER1).value() ==
                     1) {
-                    return -std::numeric_limits<double>::infinity(); // do not put gadget to person of own faction
+                    return std::numeric_limits<double>::min() + 1; // do not put gadget to person of own faction if possible
                 } else {
                     retVal += midChance;
                 }
@@ -904,10 +912,10 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
                 // already in collectedGadgets eval
                 break;
             case spy::gadget::GadgetEnum::WIRETAP_WITH_EARPLUGS:
-                retVal += (1.0 - config.getWiretapWithEarplugsFailChance()) * winningReason;
+                retVal += (1.0 - config.getWiretapWithEarplugsFailChance()) * firstWinningReason;
                 break;
             case spy::gadget::GadgetEnum::DIAMOND_COLLAR:
-                retVal += config.getCatIp() / maxIpInCasino * winningReason;
+                retVal += config.getCatIp() / maxIpInCasino * secondWinningReason;
                 break;
             case spy::gadget::GadgetEnum::JETPACK:
                 // already in movement eval
@@ -923,7 +931,7 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
                 if (s.chickenfeedResult.second.has_value()) {
                     if (libClient.hasCharacterFaction(s.chickenfeedResult.second.value(),
                                                       spy::character::FactionEnum::PLAYER1) == 1) {
-                        retVal += s.chickenfeedResult.first.value() * winningReason;
+                        retVal += s.chickenfeedResult.first.value() * firstWinningReason;
                     } else {
                         return -std::numeric_limits<double>::infinity(); // do not give ip to other factions
                     }
@@ -942,7 +950,7 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
                 if (s.mowResult.second.has_value()) {
                     if (libClient.hasCharacterFaction(s.mowResult.second.value(),
                                                       spy::character::FactionEnum::PLAYER1) == 1) {
-                        retVal += s.mowResult.first * winningReason;
+                        retVal += s.mowResult.first * firstWinningReason;
                     } else {
                         return -std::numeric_limits<double>::infinity(); // do not give ip to other factions
                     }
@@ -954,7 +962,7 @@ double evalFunctions_caro::evalUsedGadgets(const spy::gameplay::State_AI &s,
                     if (libClient.hasCharacterFaction(id, spy::character::FactionEnum::PLAYER1).value() == 1) {
                         return -std::numeric_limits<double>::infinity(); // do not wet persons that are in your faction
                     } else {
-                        retVal += midChance * winningReason;
+                        retVal += midChance * fourthWinningReason;
                     }
                 }
                 break;
