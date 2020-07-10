@@ -1,7 +1,7 @@
 # KI-Client
 This repository contains the AI-Client component of team 17 for the 
 *No Time To Spy* game of the Softwaregrundprojekt 2019/2020 at 
-the university of Ulm.
+the university of Ulm.  
 
 ## Installation 
 The AI-Client can be installed manually and through a docker container. 
@@ -85,5 +85,11 @@ Flags for the AI-Client startup:
 * `--x <key> <value>` can be used to give the server additional key-value pairs
     * `maxReconnect <int>` max number of reconnect attempts when connection to server is lost (defaults to 5)
     * `nodelay <nothing>` set this flag if AI should not delay its moves
-    
 
+## For Developers
+The AI-Client is implemented in C++. You can use e.g. CLION as development environment.  
+The following libraries where used. The respective licences  can be found in this repositories Licence file:
+* LibCommon: version see submodule
+* LibClient: version see submodule
+* CLI11: version v1.9.0
+* spdlog: version v1.6.1  
