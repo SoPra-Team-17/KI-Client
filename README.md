@@ -88,8 +88,8 @@ Flags for the AI-Client startup:
 
 ## For Developers
 The AI-Client is implemented in C++. You can use e.g. CLION as development environment.  
-The following libraries where used. The respective licences  can be found in this repositories Licence file:
-* LibCommon: version see submodule
-* LibClient: version see submodule
-* CLI11: version v1.9.0
-* spdlog: version v1.6.1  
+The following libraries where used. The respective licenses are listed below:
+* LibCommon: version see submodule [GPLv3]
+* LibClient: version see submodule [GPLv3]
+* CLI11: version 1.9.0 [[license](https://github.com/CLIUtils/CLI11/blob/master/LICENSE)]
+* spdlog: version 1.6.1 [[MIT license](https://github.com/gabime/spdlog/blob/v1.x/LICENSE)]
